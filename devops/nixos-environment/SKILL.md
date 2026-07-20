@@ -33,8 +33,9 @@ This machine is NixOS: the filesystem is immutable outside your home dir, and FH
 - ALWAYS `uv run`, never bare `python3`/`pip`:
   `uv run --with matplotlib,numpy,pandas python3 -c "…"`
 - `ModuleNotFoundError` → add the package to `--with` and retry
-- Charts with Japanese text: see skill `jp-dataviz` (matplotlib FT2Font cannot load the
-  system Noto CJK Variable Font by fname — family-name + cache refresh is the only working path)
+- Charts with Japanese text: matplotlib FT2Font cannot load the system Noto CJK Variable Font
+  by fname — set `font.family` to a name list (`Noto Sans CJK JP`, …) after a font-cache refresh;
+  see `creative/emotion-curve-feedback/references/matplotlib-cjk-fonts.md` for the full fix
 
 ## Useful paths
 

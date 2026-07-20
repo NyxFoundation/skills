@@ -6,9 +6,11 @@ Agent skills authored by Nyx Foundation — a single repository that any agent e
 Every skill is one directory containing a `SKILL.md` (YAML frontmatter: `name`, `description`,
 optionally `allowed-tools`) plus any supporting files, following the
 [Claude Code skills convention](https://docs.claude.com/en/docs/claude-code/skills).
-Skills are grouped **by domain**, not by agent. Only skills we authored live here — skill packs
-that ship with vendors or upstream tools (Cloudflare, hermes-agent, …) are installed from their
-own sources, not mirrored into this repo.
+Skills are grouped **by domain**, not by agent. Only original skills we authored live here —
+skill packs that ship with vendors or upstream tools (Cloudflare, hermes-agent, …) and rehashes
+of standard agent capabilities (Claude Code's built-in dataviz / deep-research / code-review,
+generic debugging or GitHub workflow guides) are installed from their own sources or simply not
+duplicated, never mirrored into this repo.
 
 ## Domains
 
@@ -16,14 +18,13 @@ own sources, not mirrored into this repo.
 |---|---|
 | `autonomous-ai-agents/` | Multi-agent orchestration (kanban-multi-agent) |
 | `creative/` | Narrative design and visualization — narrative-heat-engineering (NHE), emotion-curve-feedback, narrative-content-writing, [visually-3d](https://github.com/NyxFoundation/visually-3d) |
-| `data-science/` | Japanese-ready data visualization (jp-dataviz) |
 | `devops/` | Environment and operations workflows (nixos-environment, devops-workflows, mordred-hermes-setup) |
 | `formal-methods/` | Formal specification and verification ([docs2formalspec](https://github.com/NyxFoundation/docs2formalspec)) |
 | `presentation/` | Slidev deck authoring (slide, arch-diagram, animated-concept-slide) |
-| `productivity/` | Documents, events, Notion workflows, Slack integration |
-| `research/` | Deep research, formalization research programs, academic writing, research-to-repo workflows |
+| `productivity/` | Event management, Notion workflow optimization, Slack integration |
+| `research/` | Formalization research programs, research-to-repo workflow, LaTeX editing craft |
 | `security/` | Specification-anchored security auditing ([speca](https://github.com/NyxFoundation/speca)) |
-| `software-development/` | Planning, debugging, code review, delegation, and GitHub workflows |
+| `software-development/` | Nyx-specific dev workflows — PR drafting, asset hosting, interests-issue authoring, procedural 3D visualization |
 
 Some skills (`creative/visually-3d`, `formal-methods/docs2formalspec`, `security/speca`) are thin
 wrappers that `git clone` a Nyx Foundation tool repo and drive its CLI — the skill documents the
