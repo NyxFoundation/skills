@@ -45,6 +45,15 @@ This skill governs the professional orchestration of events, emphasizing structu
 - **Action**: Select the corresponding template from the Operational Manual $\rightarrow$ Populate with specific updates $\rightarrow$ Send via Slack/Email.
 - **Verification**: Log the report in the Meeting Memo or a dedicated Report DB.
 
+### 4. Sponsor Acquisition & Research
+- **Target Identification**: Actively scrape/analyze sponsors of recent adjacent high-profile events (e.g., WebX, IVS, TOKEN2049) to identify warm leads.
+- **Corporate Due Diligence**: Before pitching or recording a sponsor in the DB, conduct a structured research dive to identify the \"Why now\" and \"How it fits\":
+    - **Company Profile**: Core business model and current focus.
+    - **AI/Web3 Alignment**: Specific projects, products, or partnerships in the agentic AI / blockchain space.
+    - **Internal Justification (The 'Rin-gi' Angle)**: Formulate the internal logic for the sponsor's decision-maker (e.g., \"Presence vs. Competitors\", \"Strategic Alignment with AI Agent Economy\", \"Access to High-Net-Worth/Institutional Network\").
+- **Notion Integration**: Record this research directly into the company's Notion page to create a persistent knowledge base for the sales team.
+- **Verification**: Always verify official site availability and current leadership/partnerships via browser tools to avoid outdated info.
+
 ## Pitfalls & Lessons
 - **The \"Flat List\" Trap**: Avoid simple checklists for complex events. If a task has a \"Report Target\" or a \"Due Date\", it belongs in a DB.
 - **Reporting Silence**: In high-stakes events, no news is bad news. Establish a cadence (e.g., Mon/Thu) even if there are no major updates.

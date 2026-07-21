@@ -36,25 +36,30 @@ landing pages, papers — write with NHE, diagnose with the emotion curves, then
 
 ## Using these skills
 
-Clone once, then link the skills you want into your agent's skill directory:
+Clone once, then run `integrate.sh` to symlink every skill here into your agent's skill
+directory. Symlinks keep this repo authoritative — `git pull` updates every linked agent at once.
 
 ```bash
 git clone https://github.com/NyxFoundation/skills.git ~/workspace/skills
+cd ~/workspace/skills
 
-# Claude Code — per project:
-mkdir -p .claude/skills
-ln -s ~/workspace/skills/security/speca .claude/skills/speca
-ln -s ~/workspace/skills/presentation/* .claude/skills/
-
-# Claude Code — user-global: link into ~/.claude/skills/ instead.
-
-# hermes agent — sync into the hermes skill directory:
-rsync -a ~/workspace/skills/ ~/.hermes/skills/
+./integrate.sh                 # link all skills into Claude Code AND hermes agent
+./integrate.sh --claude        # Claude Code only  (~/.claude/skills)
+./integrate.sh --hermes        # hermes agent only (~/.hermes/skills)
+./integrate.sh --list          # list linkable skills
+./integrate.sh --status        # show what is currently linked from this repo
+./integrate.sh nyx-interests narrative-heat-engineering   # only specific skills
+./integrate.sh --remove        # unlink this repo's skills again
 ```
 
+Once linked, drive a skill by name from the agent — e.g. tell Claude
+「narrative-heat-engineering(NHE)スキルで書き直して」 or 「Nyxのinterestsにissue追加して」.
+`--copy` makes standalone copies instead of symlinks; `--force` overwrites an existing real
+directory; targets can be pointed elsewhere with `CLAUDE_SKILLS_DIR=` / `HERMES_SKILLS_DIR=`.
+
 Update flow: edit skills **in this repo** via PR; after merge, each environment runs
-`git -C ~/workspace/skills pull` and repeats its link/sync step. Local skill directories are
-disposable mirrors — never the editing target.
+`git -C ~/workspace/skills pull` — symlinks pick up the change with no re-link needed. Local
+skill directories are disposable mirrors — never the editing target.
 
 ## Adding a skill
 
