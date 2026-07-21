@@ -1,7 +1,7 @@
 # NyxFoundation/skills
 
 Agent skills authored by Nyx Foundation — a single repository that any agent environment
-(Claude Code, hermes agent, per-project workspaces) references as its skill source.
+(Claude Code, hermes agent, Codex CLI, per-project workspaces) references as its skill source.
 
 Every skill is one directory containing a `SKILL.md` (YAML frontmatter: `name`, `description`,
 optionally `allowed-tools`) plus any supporting files, following the
@@ -37,15 +37,17 @@ landing pages, papers — write with NHE, diagnose with the emotion curves, then
 ## Using these skills
 
 Clone once, then run `integrate.sh` to symlink every skill here into your agent's skill
-directory. Symlinks keep this repo authoritative — `git pull` updates every linked agent at once.
+directory (Claude Code, hermes, and Codex CLI all use the same `<name>/SKILL.md` convention).
+Symlinks keep this repo authoritative — `git pull` updates every linked agent at once.
 
 ```bash
 git clone https://github.com/NyxFoundation/skills.git ~/workspace/skills
 cd ~/workspace/skills
 
-./integrate.sh                 # link all skills into Claude Code AND hermes agent
+./integrate.sh                 # link all skills into Claude Code, hermes AND Codex
 ./integrate.sh --claude        # Claude Code only  (~/.claude/skills)
 ./integrate.sh --hermes        # hermes agent only (~/.hermes/skills)
+./integrate.sh --codex         # Codex CLI only    (~/.codex/skills)
 ./integrate.sh --list          # list linkable skills
 ./integrate.sh --status        # show what is currently linked from this repo
 ./integrate.sh nyx-interests narrative-heat-engineering   # only specific skills
@@ -55,7 +57,8 @@ cd ~/workspace/skills
 Once linked, drive a skill by name from the agent — e.g. tell Claude
 「rewrite with narrative-heat-engineering(NHE) skill」 or 「add an issue for Nyx interests」.
 `--copy` makes standalone copies instead of symlinks; `--force` overwrites an existing real
-directory; targets can be pointed elsewhere with `CLAUDE_SKILLS_DIR=` / `HERMES_SKILLS_DIR=`.
+directory; targets can be pointed elsewhere with `CLAUDE_SKILLS_DIR=` / `HERMES_SKILLS_DIR=` /
+`CODEX_SKILLS_DIR=`.
 
 <img width="2525" height="941" alt="image" src="https://github.com/user-attachments/assets/fd5c198b-bd51-459b-b3fd-f3ac66077954" />
 

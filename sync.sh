@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # sync.sh — publish/refresh self-improvements to the skills repo.
 # -----------------------------------------------------------------------------
-# Skills are SYMLINKED into each agent (see integrate.sh), so when Claude or
-# hermes edits a skill file it edits THIS repo's working tree directly. This
-# helper turns that edit into a commit + push (or pulls others' updates), so
+# Skills are SYMLINKED into each agent (see integrate.sh), so when Claude,
+# hermes or Codex edits a skill file it edits THIS repo's working tree directly.
+# This helper turns that edit into a commit + push (or pulls others' updates), so
 # self-improvement flows back to NyxFoundation/skills without manual git steps.
 #
 #   ./sync.sh                    commit ALL changes (auto message) and push

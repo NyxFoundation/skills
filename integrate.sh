@@ -3,15 +3,16 @@
 # -----------------------------------------------------------------------------
 # This repo is the single source of truth for Nyx-authored agent skills.
 # Run this script to symlink every skill here into your agent's skill directory,
-# so Claude Code and/or hermes agent can use them (e.g. "NHEスキルつかって"
-# → narrative-heat-engineering).
+# so Claude Code, hermes agent and/or Codex CLI can use them (e.g. "NHEスキル
+# つかって" → narrative-heat-engineering).
 #
 # Symlinks keep the repo authoritative: `git pull` in this repo updates every
 # linked agent instantly. Use --copy for standalone copies instead.
 #
-#   ./integrate.sh                 link all skills into Claude Code AND hermes
+#   ./integrate.sh                 link all skills into Claude Code, hermes AND Codex
 #   ./integrate.sh --claude        link into Claude Code only (~/.claude/skills)
 #   ./integrate.sh --hermes        link into hermes only     (~/.hermes/skills)
+#   ./integrate.sh --codex         link into Codex CLI only  (~/.codex/skills)
 #   ./integrate.sh --list          list linkable skills in this repo
 #   ./integrate.sh --status        show what is currently linked from this repo
 #   ./integrate.sh --copy          copy instead of symlink
@@ -19,7 +20,8 @@
 #   ./integrate.sh --remove        unlink this repo's skills from the target(s)
 #   ./integrate.sh <name> ...      operate on specific skill names only
 #
-# Targets can be overridden: CLAUDE_SKILLS_DIR=... HERMES_SKILLS_DIR=...
+# Targets can be overridden:
+#   CLAUDE_SKILLS_DIR=... HERMES_SKILLS_DIR=... CODEX_SKILLS_DIR=...
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
@@ -29,6 +31,7 @@ REPO="$(cd "$(dirname "$SELF")" && pwd)"
 
 CLAUDE_SKILLS="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
 HERMES_SKILLS="${HERMES_SKILLS_DIR:-$HOME/.hermes/skills}"
+CODEX_SKILLS="${CODEX_SKILLS_DIR:-$HOME/.codex/skills}"
 
 MODE=symlink   # symlink | copy
 FORCE=0
@@ -108,9 +111,10 @@ status_for() {   # <target-dir> <label>
 action=link
 while [ $# -gt 0 ]; do
   case "$1" in
-    -h|--help)   sed -n '2,29p' "$SELF"; exit 0;;
+    -h|--help)   sed -n '2,25p' "$SELF"; exit 0;;
     --claude)    TARGETS+=(claude);;
     --hermes)    TARGETS+=(hermes);;
+    --codex)     TARGETS+=(codex);;
     --list)      action=list;;
     --status)    action=status;;
     --remove)    action=remove;;
@@ -121,7 +125,7 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-[ ${#TARGETS[@]} -gt 0 ] || TARGETS=(claude hermes)
+[ ${#TARGETS[@]} -gt 0 ] || TARGETS=(claude hermes codex)
 
 case "$action" in
   list)
@@ -132,16 +136,19 @@ case "$action" in
     for t in "${TARGETS[@]}"; do
       [ "$t" = claude ] && status_for "$CLAUDE_SKILLS" "Claude Code"
       [ "$t" = hermes ] && status_for "$HERMES_SKILLS" "hermes agent"
+      [ "$t" = codex ]  && status_for "$CODEX_SKILLS"  "Codex CLI"
     done;;
   remove)
     for t in "${TARGETS[@]}"; do
       [ "$t" = claude ] && unlink_from "$CLAUDE_SKILLS" "Claude Code"
       [ "$t" = hermes ] && unlink_from "$HERMES_SKILLS" "hermes agent"
+      [ "$t" = codex ]  && unlink_from "$CODEX_SKILLS"  "Codex CLI"
     done;;
   link)
     for t in "${TARGETS[@]}"; do
       [ "$t" = claude ] && link_into "$CLAUDE_SKILLS" "Claude Code"
       [ "$t" = hermes ] && link_into "$HERMES_SKILLS" "hermes agent"
+      [ "$t" = codex ]  && link_into "$CODEX_SKILLS"  "Codex CLI"
     done
     echo
     printf '%s※ Claude Code は反映に新規セッションが必要な場合あり。確認: ./integrate.sh --status%s\n' "$c_d" "$c_x"
