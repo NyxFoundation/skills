@@ -61,6 +61,24 @@ Update flow: edit skills **in this repo** via PR; after merge, each environment 
 `git -C ~/workspace/skills pull` — symlinks pick up the change with no re-link needed. Local
 skill directories are disposable mirrors — never the editing target.
 
+## Self-improvement flow
+
+Because the skills are **symlinked** into each agent, editing a skill from inside Claude Code or
+hermes edits this repo's working tree directly — there is no separate copy to reconcile. To publish
+an improvement, run `sync.sh` from the repo root:
+
+```bash
+./sync.sh                  # commit all changes (auto message) + push
+./sync.sh "why it changed" # commit with your own message + push
+./sync.sh --pull           # pull others' updates into repo + every linked agent
+./sync.sh --status         # what changed since last push
+```
+
+`sync.sh` refuses to commit anything matching a credential pattern (tokens, keys, `-----BEGIN
+PRIVATE KEY-----`) so secrets never reach this public repo. **Agents: after improving a skill,
+run `./sync.sh` to publish it** — the improvement then reaches every other environment on its next
+`./sync.sh --pull`.
+
 ## Adding a skill
 
 1. Create `<domain>/<skill-name>/SKILL.md` with frontmatter (`name`, `description`; keep the
