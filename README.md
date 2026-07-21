@@ -17,10 +17,10 @@ duplicated, never mirrored into this repo.
 | Directory | Contents |
 |---|---|
 | `autonomous-ai-agents/` | Multi-agent orchestration (kanban-multi-agent) |
-| `creative/` | Narrative design and visualization — narrative-heat-engineering (NHE), emotion-curve-feedback, narrative-content-writing, [visually-3d](https://github.com/NyxFoundation/visually-3d) |
+| `creative/` | Narrative design, viral copywriting, and visualization — narrative-heat-engineering (NHE), emotion-curve-feedback, narrative-content-writing, viral-tweet (X), prtimes-press-release, youtube-title-description, [visually-3d](https://github.com/NyxFoundation/visually-3d) |
 | `devops/` | Environment and operations workflows (nixos-environment, devops-workflows, mordred-hermes-setup) |
 | `formal-methods/` | Formal specification and verification ([docs2formalspec](https://github.com/NyxFoundation/docs2formalspec)) |
-| `presentation/` | Slidev deck authoring (slide, arch-diagram, animated-concept-slide) |
+| `presentation/` | Slidev deck authoring and figures (slide, arch-diagram, animated-concept-slide, editorial-figures) |
 | `productivity/` | Event management, Notion workflow optimization, Slack integration |
 | `research/` | Formalization research programs, research-to-repo workflow, LaTeX editing craft |
 | `security/` | Specification-anchored security auditing ([speca](https://github.com/NyxFoundation/speca)) |
