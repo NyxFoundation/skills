@@ -92,8 +92,14 @@ run `./sync.sh` to publish it** — the improvement then reaches every other env
 This repo is public. Never commit:
 
 - API keys, tokens, credentials, private keys, `.env` files
-- Personal information or personal-workflow skills (private repo names, personal database IDs)
-- Internal-only URLs, hostnames, or identifiers
+- Personal information (individuals' emails, private Notion/Slack **user** IDs, DM/thread IDs)
+
+**Allowed:** non-credential resource identifiers that skills need to address shared workspace
+objects — Notion **database** IDs and Slack **channel** IDs — are kept in
+[`docs/nyx-directory.md`](docs/nyx-directory.md) and referenced by skills instead of being
+hard-coded in each one. These IDs are not secrets (they cannot be used without a separately
+configured API key/token), so they may live here. Credentials are always configured per
+environment at setup, never committed.
 
 Placeholders like `ghp_xxxx…` / `you@example.com` are fine. Review every PR against this list
 before merge.

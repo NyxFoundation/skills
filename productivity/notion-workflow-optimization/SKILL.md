@@ -7,6 +7,10 @@ description: High-fidelity Notion page authoring and management for project prop
 
 This skill governs the process of transforming raw research and proposals into structured, actionable Notion pages. It focuses on high-signal formatting and the mitigation of common API pitfalls.
 
+> **Shared IDs:** target Notion database IDs live in [`docs/nyx-directory.md`](../../docs/nyx-directory.md)
+> — reference them there rather than hard-coding. The Notion API key is configured per environment
+> (`~/.config/notion/api_key`), never committed here.
+
 ## Trigger Conditions
 - User asks to "create a proposal," "save to page," or "document a plan" in Notion.
 - Task requires structured deliverables (tables, to-do lists, headings) rather than simple text updates.

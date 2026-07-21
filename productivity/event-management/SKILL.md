@@ -7,6 +7,10 @@ description: Comprehensive workflow for planning, coordinating, and executing hi
 
 This skill governs the professional orchestration of events, emphasizing structured data over loose notes and proactive risk management.
 
+> **Shared IDs:** Notion database IDs (Log DB, 採用面談, etc.) and Slack channel IDs are in
+> [`docs/nyx-directory.md`](../../docs/nyx-directory.md) — look them up there, never hard-code.
+> Notion API key is configured per environment (`~/.config/notion/api_key`), not in this repo.
+
 ## Core Principles
 - **Data-Driven Coordination**: Every speaker, sponsor, and task must live in a database, not a page.
 - **Phase-Based Intensity**: Event planning moves through phases (e.g., Phase 1: Discovery, Phase 2: High-Density Reporting, Phase 3: Execution).
