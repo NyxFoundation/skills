@@ -53,9 +53,13 @@ cd ~/workspace/skills
 ```
 
 Once linked, drive a skill by name from the agent — e.g. tell Claude
-「narrative-heat-engineering(NHE)スキルで書き直して」 or 「Nyxのinterestsにissue追加して」.
+「rewrite with narrative-heat-engineering(NHE) skill」 or 「add an issue for Nyx interests」.
 `--copy` makes standalone copies instead of symlinks; `--force` overwrites an existing real
 directory; targets can be pointed elsewhere with `CLAUDE_SKILLS_DIR=` / `HERMES_SKILLS_DIR=`.
+
+<img width="2525" height="941" alt="image" src="https://github.com/user-attachments/assets/fd5c198b-bd51-459b-b3fd-f3ac66077954" />
+
+<img width="2553" height="824" alt="image" src="https://github.com/user-attachments/assets/634a0ec1-f3e7-4fb1-bbf9-9e435e23250d" />
 
 Update flow: edit skills **in this repo** via PR; after merge, each environment runs
 `git -C ~/workspace/skills pull` — symlinks pick up the change with no re-link needed. Local
