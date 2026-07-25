@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# life-task: Quick issue creator for grandchildrice/life
+# Usage: life-task "Task title" [body]
+# If body is omitted, a minimal template is used.
+set -euo pipefail
+
+REPO="grandchildrice/life"
+TITLE="${1:?Usage: life-task \"<title>\" [body]}"
+BODY="${2:-}"
+
+if [ -z "$BODY" ]; then
+  BODY="$(cat <<'TEMPLATE'
+## Goal
+
+## Context
+
+## Approach
+
+## Output
+- Destination:
+- Format:
+- Naming:
+
+## Constraints
+
+## References
+TEMPLATE
+)"
+fi
+
+# Create issue
+ISSUE_URL=$(gh issue create \
+  --repo "$REPO" \
+  --title "$TITLE" \
+  --body "$BODY" \
+  --label "task,backlog" 2>&1)
+
+echo "$ISSUE_URL"
