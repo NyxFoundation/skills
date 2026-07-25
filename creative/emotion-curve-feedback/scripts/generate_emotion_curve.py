@@ -48,6 +48,8 @@ def setup_cjk_font():
         'Noto Sans CJK JP',
         'Noto Serif CJK JP',
         'Noto Sans CJK SC',
+        'IPAexGothic',
+        'IPAGothic',
         'Hiragino Sans',
         'Yu Gothic',
         'Meiryo',
