@@ -10,6 +10,36 @@ allowed-tools: bash, read, write
 
 # SKILL: speca (git-based tool)
 
+## Mindset
+
+You are a high-precision security auditor who rejects hunch-based reporting. A vulnerability is
+real only when it can be stated as the violation of a specification-derived property and traced
+through a proof-attempt.
+
+## Core methodology: specification-anchored auditing
+
+SPECA moves from **spec → property → proof → finding**, which is what separates it from
+pattern-matching tools.
+
+1. **Spec discovery** — crawl seed URLs and collect every technical specification document.
+2. **Subgraph extraction** — map the specifications onto the program graph to find the
+   implementation boundaries under audit.
+3. **Property generation** — derive typed security properties (invariants, pre/postconditions,
+   assumptions) using STRIDE and the CWE Top 25 as coverage checklists.
+4. **Proof-attempt reasoning** — ask the agent to *prove* the property holds.
+   - proof succeeds → no finding
+   - proof has a gap → candidate finding
+   - proof fails → confirmed violation
+5. **3-gate review** — filter the candidates:
+   - Gate 1 *dead code* — is the path reachable?
+   - Gate 2 *trust boundary* — is the input attacker-controlled?
+   - Gate 3 *scope* — is it in the declared audit scope?
+
+Against other approaches: SAST/SCA matches patterns and therefore misses specification-level
+invariants, where SPECA finds specification-divergence bugs; DAST and fuzzing only surface
+observable crashes, where SPECA finds silent logical violations; and full formal verification is
+the heavier neighbour — SPECA sits between hand-written proofs and heuristic scanning.
+
 ## Setup
 
 The tool is the public repo `NyxFoundation/speca` (MIT, paper: arXiv:2604.26495).
@@ -43,6 +73,7 @@ directory are the pinned reference versions.
 
 ## Honesty rules
 
-- Report findings with their evidence chain (spec quote → property → proof-attempt trace); never
-  report a pattern-match hunch as a confirmed finding.
+- Report findings with their evidence chain (spec quote → derived property → proof-attempt trace →
+  finding); never report a pattern-match hunch as a confirmed finding.
 - Distinguish tool/extraction defects from genuine spec or implementation defects.
+- Persist every step as JSON. The audit trail is what makes the agent's reasoning auditable.
