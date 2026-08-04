@@ -350,8 +350,13 @@ These apply to every figure; they are what make the set look deliberate.
   report the saved file paths back to the user.
 - **Sizes:** wide diagrams 12.8 in; square radial 9.4; divergence ~10.4 x 6.4.
 - **Headline:** always `S.title_block(fig, head, sub)` — serif-bold head, soft
-  sans sub. Headlines state the takeaway, not the topic ("生成は安く、検証は
-  高くなる", not "コスト比較").
+  sans sub. Match the title to the document type. For official/public-sector
+  applications and reports, use a descriptive title that identifies the
+  figure's subject, scope, and—where useful—period or unit (for example,
+  "補助額別の年間工程及び工程別人月"). Keep interpretation in the subtitle
+  or a callout; avoid slogans and catch-copy in the title. For editorial
+  articles and pitch decks, a takeaway-led headline remains appropriate when
+  it serves the narrative (for example, "生成は安く、検証は高くなる").
 - **Colour discipline:** paper + ink carry it; `SLATE` is the cool/neutral
   default; `RUST` is reserved for *rising risk* or sparing emphasis; reach for
   `CAT[...]` only when you must distinguish categories. Avoid rainbow.

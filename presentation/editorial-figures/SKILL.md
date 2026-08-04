@@ -117,8 +117,15 @@ recipe as scaffolding, keeping the same sizes, palette, and `title_block`.
 
 ## Conventions (what makes it look intentional)
 
-- **Headlines state the takeaway, not the topic** — "生成は安く、検証は高くなる",
-  not "コスト比較".
+- **Match the title style to the document type.**
+  - For official documents, public-sector applications, grant proposals, and
+    administrative reports, use an explanatory title that identifies what the
+    figure shows, its scope, and—when useful—its period or unit (for example,
+    "補助額別の年間工程及び工程別人月"). Do not use slogans or catch-copy as
+    the main title. Put interpretation or the intended takeaway in a subtitle,
+    note, or callout.
+  - For editorial articles and pitch decks, a takeaway-led headline may be used
+    when it helps the narrative (for example, "生成は安く、検証は高くなる").
 - **Annotate at the source:** label curves at their ends, wedges via a legend
   list beside the donut — avoid detached legends that force eye travel.
 - **No overlaps:** anchor stacked text with `va="top"` and explicit y steps;
