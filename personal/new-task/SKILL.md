@@ -283,6 +283,31 @@ needs accessible explanations. Prior work in life#7 covers FHE basics.
 - life#7 — FHE入門まとめ
 ```
 
+## 長文の本文・コメントを更新する（scripts/patch_issue_comment.js）
+
+長い提案書や表を `gh issue comment --body "..."` でシェル経由に渡すと、バッククォート・`$`・
+引用符の食い違いで壊れる。`scripts/patch_issue_comment.js` は `gh api` で本文を取得し、
+Node の文字列操作で置換して JSON を stdin から PATCH するので、本文が一度もシェルを通らない。
+
+```bash
+# 見出しから次の見出しまでを差し替え（--dry-run で確認してから実行）
+node scripts/patch_issue_comment.js \
+  --endpoint repos/grandchildrice/life/issues/comments/<ID> \
+  --between "## 事業の全体像" "## 実施体制" --with-file new_section.md --dry-run
+
+# issue 本文まるごと差し替え
+node scripts/patch_issue_comment.js --endpoint repos/grandchildrice/life/issues/55 --body-file body.md
+
+# 正規表現置換（見出しレベルの一括調整など）
+node scripts/patch_issue_comment.js --endpoint ... --regex "^成果の測定(.*)$" --with '#### 成果の測定$1'
+```
+
+- `--between` と `--regex` は繰り返せる。開始マーカーが本文に複数あるとエラーで止まる
+  （意図しない場所を書き換えないため）。
+- `--dry-run` は PATCH せず、置換前後の文字数と最初の差分位置の前後 40 字だけを出す。
+  **破壊的更新なので、まず dry-run で確認する。**
+- 長文の生成側（docx など）は `productivity/docx-proposal-filler` を参照。
+
 ## Recommended Labels
 
 ```bash

@@ -167,6 +167,22 @@ this order, before writing coordinates:
 5. Update the slide's speaker-notes 【概念図の読み方】 to match the final geometry, and
    note the generating script path there.
 
+## Examples
+
+`examples/` に、実際に PR 原稿へ載せた対の図の生成スクリプトが入っている（Aladdin Security
+共同研究の記事用）。ゼロから書き始める前にこの2本を読むと、上のレシピが具体形でわかる。
+
+| ファイル | 何の図か |
+|---|---|
+| `examples/problem_translation_wall.py` | 問題図。「具体構造ごとに証明をゼロから独立探索していて、定理の在庫が構造の数だけ膨張する」状態 |
+| `examples/solution_category_theory.py` | 解決図。抽象定理を圏論的中間表現として一度だけ証明し、各構造へ降ろす |
+
+読みどころは figure そのものより**冒頭コメントの改訂経緯**。初版は「自然言語→Lean 命題の翻訳の壁を
+圏論が埋める」という筋書きだったが、社内研究メモがそれを明示的に否定していた（formalization gap は
+圏論化でも消えない）ため、図の主張ごと描き直している。**図は主張であり、裏が取れない主張は描かない。**
+
+実行するときは冒頭の `OUT` を自分のリポジトリの `public/images/` に書き換える。
+
 ## Pitfalls
 
 | 失敗 | 対処 |
