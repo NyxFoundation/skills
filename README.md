@@ -64,6 +64,23 @@ directory; targets can be pointed elsewhere with `CLAUDE_SKILLS_DIR=` / `HERMES_
 
 <img width="2553" height="824" alt="image" src="https://github.com/user-attachments/assets/634a0ec1-f3e7-4fb1-bbf9-9e435e23250d" />
 
+### Agent-bundled skills stay at their source
+
+Skills that ship with an agent are **linked from that agent, not copied here** — otherwise the
+copy silently drifts from the version its own runtime updates. hermes-agent bundles its set under
+`~/hermes-agent/skills/<domain>/<name>/`, and `~/.hermes/skills/.bundled_manifest` is the list of
+what it considers its own. To expose one to another agent, link it directly:
+
+```bash
+ln -sfn ~/hermes-agent/skills/productivity/docx ~/.claude/skills/docx
+```
+
+Currently linked this way: `computer-use`, `docx`, `pdf`, `xlsx`, `grounded-citations`,
+`hermes-agent`, `inspecting-hermes-desktop-dom`. `integrate.sh` only manages links that point
+into this repo, so `--remove` leaves these untouched. When an agent-bundled skill needs a
+project-specific counterpart, write the counterpart here and have it name the bundled skill as
+the general-purpose fallback (see `productivity/docx-proposal-filler`).
+
 Update flow: edit skills **in this repo** via PR; after merge, each environment runs
 `git -C ~/workspace/skills pull` — symlinks pick up the change with no re-link needed. Local
 skill directories are disposable mirrors — never the editing target.
