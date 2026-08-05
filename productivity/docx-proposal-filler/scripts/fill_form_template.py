@@ -21,6 +21,10 @@ from docx.oxml.ns import qn
 from docx.shared import Pt
 
 
+# 南砺案件の実データは Google Drive に退避済み（ローカルからは削除）:
+#   gdrive:"💼 work/Nyx Foundation/nanto/ふるさと納税申請書/"
+#     テンプレート/ = 配布された空の原本、20260722/ = 記入済み、20260731/ = 提出版
+# 別案件で使うときは、この2つを自分の入出力ディレクトリに差し替える。
 SOURCE_DIR = Path("/home/gohan/nanto-template-downloads")
 OUTPUT_DIR = Path("/home/gohan/nanto-original-layout-20260731")
 COMMENT_ENDPOINT = "repos/grandchildrice/life/issues/comments/5138640138"

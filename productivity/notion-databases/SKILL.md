@@ -2,10 +2,10 @@
 name: notion-databases
 description: |
   Nyx Notion workspace API patterns: the Scrapbox DB schema, working curl patterns for the Notion API
-  (page creation, block-append gotchas, image/file upload), and where the workspace's database IDs live.
+  (page creation, block-append gotchas, block surgery on existing pages, image/file upload), and where the workspace's database IDs live.
   Database IDs themselves are NOT hard-coded here — they are in docs/nyx-directory.md. Load when creating
   or updating Notion pages, querying a Nyx database, or debugging Notion API errors.
-version: 1.1.0
+version: 1.2.0
 author: gohan (via Claude Code tuning)
 license: MIT
 platforms: [linux, macos]
@@ -19,7 +19,9 @@ metadata:
 ## Credentials
 - API key: read from `~/.config/notion/api_key` (also available to MCP server `notion`) — configured
   per environment at setup, never committed to this repo.
-- API version header: `Notion-Version: 2022-06-28`
+- API version header: `Notion-Version: 2022-06-28` for the page/database calls below.
+  The block-surgery scripts were run against `2025-09-03`; either works for
+  `/blocks/*`, but keep one version per script — response shapes differ between them.
 - Prefer the Notion MCP tools; fall back to direct `curl` when the MCP tool fails.
 
 ## Database IDs
@@ -56,6 +58,73 @@ curl -s -X POST https://api.notion.com/v1/pages \
     ]
   }'
 ```
+
+## Editing an existing page (block surgery)
+
+Revising a long page — swapping a figure, renaming a heading, replacing one
+chapter — is not a `curl` one-liner: you must first *find* the block. Do it in a
+small script rather than by hand.
+
+```js
+const headers = {
+  Authorization: `Bearer ${process.env.NOTION_API_TOKEN}`,
+  "Notion-Version": "2025-09-03",
+  "Content-Type": "application/json",
+};
+const api = async (path, options = {}) => {
+  const r = await fetch(`https://api.notion.com/v1${path}`, { headers, ...options });
+  const t = await r.text();
+  if (!r.ok) throw new Error(`${r.status}: ${t}`);   // Notion's error body names the bad field — print it
+  return t ? JSON.parse(t) : {};
+};
+const textOf = (b) => (b[b.type]?.rich_text || []).map((i) => i.plain_text || "").join("");
+
+// 1. Read ALL children — one request returns at most 100 blocks.
+const blocks = [];
+let cursor;
+do {
+  const q = new URLSearchParams({ page_size: "100" });
+  if (cursor) q.set("start_cursor", cursor);
+  const page = await api(`/blocks/${PAGE_ID}/children?${q}`);
+  blocks.push(...page.results);
+  cursor = page.has_more ? page.next_cursor : null;
+} while (cursor);
+```
+
+With `blocks` in hand:
+
+- **Locate a section** by its heading, then slice to the next heading of the same
+  level — that range *is* the chapter:
+  ```js
+  const start = blocks.findIndex((b) => b.type === "heading_1" && textOf(b).startsWith("4."));
+  const end   = blocks.findIndex((b, i) => i > start && b.type === "heading_1");
+  const figure = blocks.slice(start + 1, end).find((b) => b.type === "image");
+  ```
+- **Insert at a position** — `PATCH /blocks/{page_id}/children` takes an `after`
+  block id. Without it, children always land at the end of the page.
+- **Delete** — `PATCH /blocks/{id}` with `{"archived": true}` (or `DELETE
+  /blocks/{id}`). Archived blocks vanish from the page but stay recoverable.
+- **Replace = insert then archive, in that order.** Add the new block `after` the
+  heading first, then archive the old one. Archiving first leaves the page
+  visibly broken if the insert fails.
+- **Edit text in place** — `PATCH /blocks/{id}` with the block's own type key:
+  ```js
+  await api(`/blocks/${target.id}`, { method: "PATCH", body: JSON.stringify({
+    heading_1: { rich_text: [{ type: "text", text: { content: "新しい見出し" } }] } }) });
+  ```
+- **Audit before and after.** Dump `type` + `textOf` for every block to check the
+  heading tree, count figures, and confirm captions. On a page of a few hundred
+  blocks this catches a mis-anchored insert immediately; scrolling the UI does not.
+
+Tables are `table` blocks whose `children` are `table_row`s — build the rows with
+the table, not in a second call.
+
+**Swapping a figure** composes the two halves of this skill: upload the new PNG
+with `ntn` (see below) to get an upload id, insert it `after` the section heading
+as `{"type": "image", "image": {"type": "file_upload", "file_upload": {"id": …},
+"caption": [rt("図3　…")]}}`, then archive the old image block. Set the caption in
+the same call — adding it afterwards is a second round-trip against a block whose
+id you would have to look up again.
 
 ## Known Gotchas
 

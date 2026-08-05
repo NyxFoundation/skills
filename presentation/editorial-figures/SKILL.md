@@ -1,6 +1,6 @@
 ---
 name: editorial-figures
-description: Produce polished, editorial-quality figures as image files (PNG, optionally SVG) with Python and matplotlib, sharing one cohesive paper-and-ink look and clean Japanese (Noto CJK JP) typography. Covers seven reusable archetypes — divergence / scissors charts, radial convergence (hub-and-spoke) diagrams, stat-card evidence dashboards, concept / flow diagrams (inputs to engine to outputs), calendar timelines, donut-plus-bar composites, and venue / zoning layouts. Use this skill whenever the user wants figures, diagrams, charts, or 図 / グラフ / ダイアグラム for a proposal, pitch deck, report, 企画書, or slide; wants a SET of visuals that look consistent; needs Japanese text rendered cleanly in matplotlib (avoiding tofu boxes); or asks for downloadable image figures rather than an inline sketch. Prefer it over ad-hoc matplotlib whenever visual polish, a shared palette, or Japanese typography matter. Also use it to extend or restyle figures already produced this way.
+description: Produce polished, editorial-quality figures as image files (PNG, optionally SVG) with Python and matplotlib, sharing one cohesive paper-and-ink look and clean Japanese (Noto CJK JP) typography. Covers eight reusable archetypes — divergence / scissors charts, radial convergence (hub-and-spoke) diagrams, stat-card evidence dashboards, concept / flow diagrams (inputs to engine to outputs), calendar timelines, donut-plus-bar composites, venue / zoning layouts, and Gantt / schedule matrices (工程表). Use this skill whenever the user wants figures, diagrams, charts, or 図 / グラフ / ダイアグラム for a proposal, pitch deck, report, 企画書, or slide; wants a SET of visuals that look consistent; needs Japanese text rendered cleanly in matplotlib (avoiding tofu boxes); or asks for downloadable image figures rather than an inline sketch. Prefer it over ad-hoc matplotlib whenever visual polish, a shared palette, or Japanese typography matter. Also use it to extend or restyle figures already produced this way.
 compatibility: Requires Python with matplotlib and numpy; uharfbuzz + fonttools and system Noto CJK fonts for Japanese. On this NixOS workstation everything is available via `uv run` (see nixos-environment skill).
 metadata:
   type: reference
@@ -111,6 +111,7 @@ it.** Give such labels `zorder=5` or `6`. (See the convergence recipe.)
 | An event placed inside a date window | Calendar timeline | recipes §5 |
 | A composition plus ranked channels/sources | Donut + bars | recipes §6 |
 | Rooms / zones of a venue or space | Zoning / floor plan | recipes §7 |
+| A schedule: grouped tasks over a month axis, with deliverables | Gantt / schedule matrix | recipes §8 |
 
 If the request fits none cleanly, compose from the helpers using the nearest
 recipe as scaffolding, keeping the same sizes, palette, and `title_block`.
@@ -139,9 +140,14 @@ recipe as scaffolding, keeping the same sizes, palette, and `title_block`.
   ranges, cite a source on every stat card, and note when wedges use midpoints.
 - **Consistency across a set:** reuse `style.py`, the same figure widths, and
   one `title_block` style for all figures in a deliverable.
+- **Size for the print, not the screen.** When a figure will be pasted into a
+  document, work out the shrink factor first — a 24in canvas at 265mm (A4
+  landscape, full width) is ×0.44 — and pick font sizes so the printed result is
+  ≥9pt. A table-like figure that looks fine on screen routinely prints at 3pt.
+  When it no longer fits, split the figure; never shrink the type. (recipes §8)
 
 ## Files
 
 - `assets/style.py` — palette, fonts (self-building JP cache), drawing helpers. Copy to cwd.
-- `references/recipes.md` — the seven archetype recipes + the full conventions list. Read before building.
+- `references/recipes.md` — the eight archetype recipes + the full conventions list. Read before building.
 - `scripts/setup_fonts.py` — optional font cache warm-up / troubleshooting.

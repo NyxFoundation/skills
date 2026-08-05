@@ -19,6 +19,7 @@ with `S.save(fig, "name.png")`. Adapt the data lists/dicts; keep the structure.
 5. [Calendar timeline (day strip + event bars)](#5-calendar-timeline)
 6. [Donut + horizontal bars (composition + channels)](#6-donut--bars)
 7. [Zoning / floor plan (tinted zone boxes)](#7-zoning--floor-plan)
+8. [Gantt / schedule matrix (grouped task rows)](#8-gantt--schedule-matrix)
 
 Universal conventions are repeated at the [bottom](#conventions). The most
 common bug: **filled shapes hide text** — give labels a higher `zorder` than the
@@ -338,6 +339,99 @@ def zoning(zones, feats=(), entrance=None, out="fig_zoning.png"):
 
 # Tint a zone fill from a base colour with S.lighten(S.SLATE, 0.86), etc.
 ```
+
+---
+
+## 8. Gantt / schedule matrix
+
+**When:** a 工程表 — tasks grouped into phases, each with a period on a month
+axis and a deliverable. Unlike §5 (one event in a date window) this is a *matrix*:
+many rows, a shared time axis, and an optional right-hand deliverable column.
+Use it for grant/procurement schedules, WBS summaries, and roadmaps.
+
+Two things make or break it, and neither is visible on screen:
+
+**Size the canvas from the row count, never the reverse.** Fix a row height in
+inches and derive the figure height. A fixed canvas with a variable row count is
+what produces unreadable output.
+
+**Set font sizes from the print scale.** A 24in-wide canvas pasted at 265mm
+(A4 landscape, full width) shrinks by 265 / (24 × 25.4) ≈ **0.44**. So a `size=23`
+label prints at ~10pt, and the `size=10` you would use on screen prints at 4.4pt.
+Compute `effective_pt = size × print_scale` and keep body labels ≥ 9pt. When the
+rows no longer fit at that size, **split into two figures by group** — do not
+shrink. (A 29-row single-page version of this figure printed at ~3pt.)
+
+```python
+import math
+import matplotlib.patches as patches
+
+def gantt(groups, tasks, months, series, out="fig_gantt.png",
+          canvas_w=24.0, row_h=0.60, print_scale=0.44, title=("見出し", "サブ見出し。")):
+    # groups: [(key, label, colour)]
+    # tasks:  {key: [(code, name, start, end, deliverable)]}   start/end = month index
+    # series: [(label, colour, {code: intensity 0..1})]  -- scenarios compared inside one row
+    sz = lambda pt: round(pt / print_scale)          # ask for printed pt, get canvas pt
+    n_rows = sum(1 + len(tasks[k]) for k, _, _ in groups)
+    top_pad, bottom_pad = 2.35, 1.95
+    h = top_pad + n_rows * row_h + bottom_pad
+    fig, ax = S.new(canvas_w, h, xlim=(0, canvas_w), ylim=(0, h))
+
+    tl_x, tl_w, out_x = 6.55, 9.9, 16.95
+    month_w = tl_w / len(months)
+    S.t(ax, 0.55, h - 0.55, "工程・作業", fp="bold", size=sz(12), color=S.INK, va="center")
+    S.t(ax, tl_x, h - 0.55, "実施期間", fp="bold", size=sz(12), color=S.INK, va="center")
+    S.t(ax, out_x, h - 0.55, "主な成果物", fp="bold", size=sz(12), color=S.INK, va="center")
+    for i, m in enumerate(months):                    # month labels + vertical gridlines
+        S.t(ax, tl_x + (i + 0.5) * month_w, h - 1.35, m, fp="med", size=sz(9),
+            color=S.SOFT, ha="center", va="center")
+        ax.plot([tl_x + i * month_w] * 2, [bottom_pad - 0.35, h - 1.75], color=S.HAIR, lw=1.2, zorder=0)
+
+    row = 0
+    for key, label, colour in groups:
+        y = h - top_pad - (row + 0.5) * row_h         # tinted band = phase header
+        ax.add_patch(patches.Rectangle((0.35, y - row_h * 0.46), canvas_w - 0.7, row_h * 0.92,
+                                       fc=S.lighten(colour, 0.90), ec="none", zorder=0))
+        S.t(ax, 0.55, y, f"{key}  {label}", fp="bold", size=sz(11), color=colour, va="center")
+        row += 1
+        for code, name, start, end, deliv in tasks[key]:
+            y = h - top_pad - (row + 0.5) * row_h
+            S.t(ax, 0.70, y, code, fp="bold", size=sz(10), color=colour, va="center")
+            S.t(ax, 1.55, y, name, fp="med", size=sz(10), color=S.INK, va="center")
+            S.t(ax, out_x, y, deliv, fp="reg", size=sz(9.5), color=S.SOFT, va="center")
+            ax.plot([0.35, canvas_w - 0.35], [y - row_h * 0.48] * 2, color=S.HAIR, lw=0.8, zorder=0)
+            for si, (_, s_colour, effort) in enumerate(series):
+                k = effort.get(code, 0)               # 0 = this scenario skips the task
+                if k <= 0:
+                    continue
+                span = end - start + 1                # length AND weight encode intensity
+                n = max(1, min(span, math.ceil(span * (0.42 + 0.58 * k))))
+                x0 = tl_x + start * month_w + 0.06
+                x1 = tl_x + (start + n) * month_w - 0.06
+                yy = y + (si - (len(series) - 1) / 2) * 0.068     # stack series within the row
+                ax.plot([x0, x1], [yy, yy], color=s_colour, lw=3.4 + 2.8 * k,
+                        solid_capstyle="round", zorder=2 + si)
+            row += 1
+
+    S.t(ax, 0.55, bottom_pad - 0.55, "凡例（線の長さ＝実施期間、濃さ＝相対投入量）：",
+        fp="med", size=sz(9), color=S.SOFT, va="center")
+    for i, (lab, s_colour, _) in enumerate(series):   # swatch + label, kept off the note line
+        x = 0.95 + i * 3.75
+        ax.plot([x, x + 0.7], [bottom_pad - 1.30] * 2, color=s_colour, lw=8.0, solid_capstyle="round")
+        S.t(ax, x + 0.85, bottom_pad - 1.30, lab, fp="med", size=sz(9.5), color=S.SOFT, va="center")
+
+    S.title_block(fig, title[0], title[1], x=0.022, y=0.985, hs=sz(13), ss=sz(9))
+    return S.save(fig, out)
+
+# Splitting: call gantt() twice with disjoint `groups`, and put the part in the
+# title — "（1／2：A〜C 中核実証）" / "（2／2：D〜G 追加工程・測定）". Keep row_h,
+# font sizes and the month axis identical across parts so they read as one set.
+```
+
+**Tasks that finish at a deadline** (reporting, acceptance, final delivery) should
+grow *backwards* from `end` rather than forwards from `start` — otherwise a
+short-effort scenario draws its bar at the start of a window it actually works at
+the end of. Keep a set of such codes and flip `x0`/`x1` for them.
 
 ---
 
