@@ -21,7 +21,7 @@ duplicated, never mirrored into this repo.
 | `devops/` | Environment and operations workflows (nixos-environment, devops-workflows, mordred-hermes-setup) |
 | `formal-methods/` | Formal specification and verification ([docs2formalspec](https://github.com/NyxFoundation/docs2formalspec)) |
 | `presentation/` | Slidev deck authoring and figures (slide, arch-diagram, animated-concept-slide, editorial-figures) |
-| `productivity/` | Event management, Notion workflow optimization, Slack integration |
+| `productivity/` | Client-facing proposal + WBS authoring (pmbok-proposal-wbs), event management, Notion workflow optimization, Slack integration |
 | `research/` | Formalization research programs, research-to-repo workflow, LaTeX editing craft |
 | `security/` | Specification-anchored security auditing ([speca](https://github.com/NyxFoundation/speca)) |
 | `software-development/` | Nyx-specific dev workflows — PR drafting, asset hosting, interests-issue authoring, procedural 3D visualization |
@@ -33,6 +33,12 @@ clone step and the workflow.
 Notable pairing: **narrative-heat-engineering** (design side) and **emotion-curve-feedback**
 (diagnostic side) form one methodology for any sequential content — slide decks, articles,
 landing pages, papers — write with NHE, diagnose with the emotion curves, then iterate.
+
+**pmbok-proposal-wbs** carries the same design/diagnose split into enterprise proposals: author the
+docx + WBS workbook, then hand the extracted text to an independent agent (Codex CLI / hermes) and
+iterate until it rules the document submittable. The rules it encodes — no meta text, no revision
+history, task rollup must equal role capacity, explicit buffer, rendered figures over code blocks —
+are the findings that survived that loop.
 
 ## Using these skills
 
