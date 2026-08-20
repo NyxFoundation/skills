@@ -30,18 +30,134 @@ gets killed — see `references/client-ready-rules.md`.
 
 ## Workflow
 
+Eight phases. Each ends with something checkable. Do **not** collapse 2 into 5 — writing the docx
+first produces a document full of reasoning that then has to be scrubbed, and the scrubbing is what
+leaves the tell-tale seams.
+
+### 0. Intake — ask before writing
+
+Ten questions. Ask the unanswered ones **in one batch**, propose a default for each, and start on the
+defaults if the requester says "任せる". Leaving these implicit is what turns one pass into five.
+
+| # | 確認事項 | 既定値 |
+|---|---|---|
+| 1 | 提出先（社名・部門・読み手の職掌） | — 必須。宛名と用語の粒度が決まる |
+| 2 | 期間と着手日 | 4 カレンダー週。祝日を除いた営業日数を算出して提示 |
+| 3 | 対象範囲（システム／業務） | 未定なら 8 章の選定観点を提示して客に選ばせる建て付け |
+| 4 | 成果物の形式 | 提案書 docx ＋ WBS/ガント/見積 xlsx |
+| 5 | 単価の扱い | 本文は工数のみ。単価と契約金額は別紙。xlsx に入力欄 |
+| 6 | 実施主体の正式表記 | — 必須。途中で変わると全文書き換え |
+| 7 | 配布先（repo / Drive フォルダ ID） | private repo ＋ Drive |
+| 8 | 顧客名を repo に書いてよいか | **公開 repo なら書かない。** 一般化してテンプレート化 |
+| 9 | レビュー担当エージェント | `codex exec` |
+| 10 | 既存資料・過去のやり取り | issue / 過去提案 / 議事録があれば先に読む |
+
+**出力**: 諸元が確定した状態。
+
+### 1. Evidence — gather before arguing
+
+Chapter 1 is the longest and carries every external claim. Collect first, write second.
+
+- 一次情報を取りに行く: プレスリリース、公式製品ページ、論文（arXiv）、規格（ISO/IEC 等）
+- 手法の中身は**実装を読む**。スキーマ・プロンプト・サンプル出力が、公式ドキュメントより正確
+- 各数値に「該当箇所 / 内容 / 出典」の 3 列を持たせ、そのまま付録 D になる形で貯める
+- 他社実績と自社実績を混ぜない。報道ベースは採用しないか、報道と明示する
+
+**出力**: 出典表（付録 D の原型）。
+
+### 2. Source docs — the private set
+
+Write the ten `.md` files. Structure and per-file contents in `references/document-skeleton.md`.
+
+**出力**: `docs/00`〜`09` ＋ `README.md`。この時点で論理は完成している。
+
+### 3. Numbers — reconcile before generating
+
 ```
-1  Scope        — read the brief; identify the phase chain and the gate structure
-2  Source docs  — write the internal .md set first (background, scope, WBS, deliverables, RACI, risks)
-3  Numbers      — build the WBS, then reconcile task rollup ↔ role capacity ↔ estimate  ← invariant
-4  Figures      — render actual images for anything structural; inspect every PNG
-5  Generate     — make_docx.js and make_xlsx.py emit the client artifacts from the source docs
-6  Review loop  — external agent reviews the extracted full text; iterate until "提出可"
-7  Distribute   — private repo push, then Drive (docx/xlsx originals + native Google Docs/Sheets)
+phases → tasks (with effort) → vendor-side rollup → role table → capacity check → buffer
 ```
 
-Do **not** skip step 2 into step 5. Writing the docx first produces a document full of reasoning
-that then has to be scrubbed out, and the scrubbing is what leaves the tell-tale seams.
+Build the WBS first and derive the role table from its rollup — never the reverse.
+`Σ role effort ≤ business days × headcount`, 75–90% utilisation.
+Details and the worked failure case in `references/wbs-and-estimation.md`.
+
+**出力**: タスク積み上げ＝ロール別工数、capacity 内、予備工数が別行で計上済み。
+
+### 4. Figures — render, then look at them
+
+Anything structural (state machines, graphs, flows, architectures) gets a rendered PNG.
+A mermaid block or a code listing does not communicate. Use `presentation/editorial-figures`.
+Never rely on colour alone. **Open every PNG with the Read tool and fix it.**
+
+**出力**: 目視済みの PNG。
+
+### 5. Generate
+
+```bash
+npm install docx && node make_docx.js                       # → proposal .docx
+uv run --quiet --with openpyxl python make_xlsx.py          # → WBS/Gantt/estimate .xlsx
+```
+
+Chapter order and the workbook sheet set: `references/document-skeleton.md`.
+
+### 6. Self-check — before spending a review round
+
+```bash
+uv run --quiet python preflight_check.py proposal.docx --dump proposal_dump.md
+```
+
+Validates every XML part, counts outline levels, greps the banned vocabulary, measures
+sentence-ending monotony, flags unqualified superlatives, finds cross-references that point at
+missing headings, and reports numeric drift. **BLOCKER が 0 になるまで外部レビューに回さない** —
+機械で見つかる指摘に人間のレビューラウンドを使わない。
+
+### 7. Review loop — blocking
+
+Hand `proposal_dump.md` to an agent that did not write it. Iterate until 「このまま提出可 /
+実害のある問題：なし」. Budget 4–7 rounds; shrink the finding cap each round; the final round asks
+for a verdict only. Prompts, triage rules, and convergence signals in `references/review-loop.md`.
+
+```bash
+codex exec --skip-git-repo-check -c model_reasoning_effort="high" \
+  "$(cat review_prompt.txt)" < /dev/null > review.txt 2>&1      # < /dev/null is mandatory
+```
+
+**A finding that conflicts with an explicit instruction from the requester is not automatically
+right.** Satisfy the concern another way and report both.
+
+**出力**: 提出可の判定。要した巡回数と、却下した指摘とその理由。
+
+### 8. Distribute
+
+```bash
+git add -A && git commit && git push                          # private repo
+
+rclone copy proposal.docx gdrive: --drive-root-folder-id <ID> --tpslimit 2   # originals
+rclone copy wbs.xlsx      gdrive: --drive-root-folder-id <ID> --tpslimit 2
+
+# native Google Docs/Sheets — first time only (rclone --drive-import-formats does NOT convert)
+curl -X POST ".../files/<FILE_ID>/copy" -d '{"mimeType":"application/vnd.google-apps.document",...}'
+
+# thereafter update IN PLACE so the shared URL survives
+curl -X PATCH ".../upload/drive/v3/files/<DOC_ID>?uploadType=media" --data-binary @proposal.docx
+```
+
+Full commands and the quota/backoff notes in `references/toolchain.md`.
+
+---
+
+## Definition of done
+
+```
+[ ] 諸元 10 項目が確定している（不明なものは仮定として明記した）
+[ ] 外部数値が全件、付録 D の出典表に載っている
+[ ] タスク積み上げ = ロール別工数 ≤ capacity、予備工数が別建て
+[ ] 構造的な内容が図になっていて、全 PNG を目視した
+[ ] preflight_check.py が clean
+[ ] 外部エージェントが「提出可」と判定した
+[ ] private repo に push 済み、Drive に反映済み（共有済み URL は維持）
+[ ] レンダリング検証の可否を報告に明記した（LibreOffice が無ければ「未検証」と書く）
+```
 
 ---
 
@@ -214,11 +330,13 @@ Full notes, including where the OAuth token lives, in `references/toolchain.md`.
 
 ## Files
 
+- `references/document-skeleton.md` — **the chapter structure and source-doc set. Read this first.**
 - `references/client-ready-rules.md` — the full client-ready checklist, with before/after examples
 - `references/wbs-and-estimation.md` — WBS construction, gate design, effort reconciliation, buffer
 - `references/review-loop.md` — prompt templates for each round, triage rules, convergence
 - `references/toolchain.md` — docx-js / openpyxl / matplotlib / rclone / Drive API pitfalls
-- `assets/make_docx.js`, `assets/make_xlsx.py` — generator skeletons
+- `assets/make_docx.js`, `assets/make_xlsx.py` — generator skeletons (runnable as-is)
+- `assets/preflight_check.py` — pre-review self-check; exits non-zero on a blocker
 
 ## Related skills
 
