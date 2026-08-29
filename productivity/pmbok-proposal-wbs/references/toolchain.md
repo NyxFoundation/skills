@@ -241,3 +241,90 @@ which codex
 ```
 
 State the missing pieces in the final report rather than implying verification you could not perform.
+
+---
+
+## Markdown → docx で必ず踏む 3 つ
+
+### 1. 折り返し行が 1 段落ずつ出る
+
+markdown を行単位で処理する変換器は、**ソースの折り返しをそのまま段落の区切りにする**。
+段落間の余白が全行に入り、ページ数が 3〜4 割ふくらむ。文が 2〜3 行に分断されて見えるので、
+体裁も壊れる。67 ページのうち 10 ページ以上がこれだった。
+
+**空行までを 1 段落にまとめてから流し込む。** 箇条書きの継続行（インデント行）も同様に吸収する。
+
+```python
+buf = [ln.strip()]
+j = i + 1
+while j < len(lines) and lines[j].strip():
+    nxt = lines[j]
+    if nxt.startswith(("#", "|", "> ", "```", "![")) or re.match(r"^\s*[-*\d]", nxt):
+        break
+    buf.append(nxt.strip()); j += 1
+write_inline(p, "".join(buf))          # 和文なので連結時に空白を入れない
+i = j
+```
+
+`preflight_check.py` が「句点で終わらない段落の比率」で検出する。25% を超えたら疑う。
+
+### 2. インライン強調が行をまたぐと記号が出る
+
+`**強調**` の正規表現は行をまたがない。markdown 側で折り返すと、アスタリスクがそのまま docx に出る。
+
+- **強調は 1 行に収める。** 長い強調は文を分ける
+- 生成後に `literal **` を数えて 0 を確認する。目視では見落とす
+
+### 3. 見出しにアウトラインレベルが載らない
+
+`add_heading()` のスタイルだけでは `w:outlineLvl` が付かず、**Word のナビゲーションウィンドウと
+Google ドキュメントの目次が空になる**。python-docx でも明示的に足す。
+
+```python
+o = OxmlElement("w:outlineLvl"); o.set(qn("w:val"), str(level - 1))
+h._p.get_or_add_pPr().append(o)
+```
+
+---
+
+## 図: フォント名で Bold を信頼しない
+
+CJK フォントが**可変フォント 1 本**で入っている環境（NixOS の `NotoSansCJK-VF.otf.ttc` など）では、
+matplotlib の `font_manager` に **weight=100（Thin）としてしか登録されない**。
+`fontweight="bold"` を指定しても効かず、全部の和文が極細で描かれる。
+
+Google ドキュメントが取り込み時に画像の長辺を 2048px へ縮小するため、この細さでは線が飛び、
+「画質は悪くないのに読めない」状態になる。**目視でも気づきにくい。**単体で見ると読めるからである。
+
+確認と回避:
+
+```bash
+python3 -c "import matplotlib.font_manager as fm; \
+  print({(f.name,f.weight) for f in fm.fontManager.ttflist if 'CJK' in f.name})"
+```
+
+静的ウェイトが無ければ、保存直前に全テキストを同色で縁取って太らせる。
+
+```python
+import matplotlib.patheffects as pe
+from matplotlib.text import Text
+for t in fig.findobj(Text):
+    if t.get_text().strip() and not t.get_path_effects():
+        t.set_path_effects([pe.withStroke(linewidth=t.get_fontsize() * 0.11,
+                                          foreground=t.get_color())])
+```
+
+`assets/figure_preflight.py` が、使用フォントの weight と描画後の線の細さを報告する。
+
+---
+
+## Drive API は 403 を返す前提で書く
+
+rclone の共有 OAuth クライアント経由だと、**正常なリクエストでも 403 が頻繁に返る**。
+スコープの問題ではない。20 秒待って最大 15 回再試行する。
+
+- **401 はトークン切れ。** `rclone lsd gdrive:` を 1 回叩けば更新されるので、API を叩く前に流す
+- `files.list`（フォルダの列挙）は特に 403 になりやすい。`files.get` を ID 指定で使うほうが通る
+- 既存ファイルの更新は ID 固定の `files.update`。URL・ファイル名・配置フォルダが変わらない
+- 新規作成は multipart POST。`mimeType` に Google 形式を指定すると変換され、指定しなければ
+  アップロードした形式のまま置かれる。**ガントを含む xlsx は変換しない**（塗り分けと列幅が崩れる）

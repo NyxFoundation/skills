@@ -4,12 +4,15 @@ description: |
   Author an enterprise-grade proposal (docx) plus a PMBOK-style WBS / Gantt / estimate workbook (xlsx)
   that can be handed to a large corporate or public-sector client as-is, then harden it through a
   recursive external-agent review loop (Codex CLI / hermes) until an independent reviewer rules it
-  submittable. Covers the client-ready writing rules (no meta text, no revision history, no AI tells),
-  numeric-consistency invariants (task rollup must equal role-based effort), explicit buffer accounting,
-  minimal-deliverable design, rendered figures instead of code blocks, heading outline levels, unit-price
-  separation, and the Drive / GitHub distribution steps. Trigger on: 「提案書を作って」「WBS を引いて」
-  「ガントチャート」「見積を出して」「PMBOK」「提案資料の体裁」, or any request to turn a scope into a
-  client-facing proposal + schedule + estimate.
+  submittable. Covers the client-ready writing rules (no meta text, no revision history, no AI tells,
+  no internal paths in figure captions), the page budget and the 本編 / 技術別紙 split, reading the
+  client's own API docs and OSS source before writing so "preliminary experiment" tasks disappear
+  from the WBS, confirmation items phrased as 「私たちの理解は XX。正しいか」, numeric-consistency
+  invariants (one script is the single source for schedule, effort and the body tables), explicit
+  buffer accounting, option sets where every option reaches the goal, rendered figures with verified
+  font weight, heading outline levels, unit-price separation, and the Drive / GitHub distribution
+  steps. Trigger on: 「提案書を作って」「WBS を引いて」「ガントチャート」「見積を出して」「PMBOK」
+  「提案資料の体裁」, or any request to turn a scope into a client-facing proposal + schedule + estimate.
 ---
 
 # PMBOK-style proposal & WBS
@@ -30,9 +33,10 @@ gets killed — see `references/client-ready-rules.md`.
 
 ## Workflow
 
-Eight phases. Each ends with something checkable. Do **not** collapse 2 into 5 — writing the docx
+Nine phases. Each ends with something checkable. Do **not** collapse 2 into 5 — writing the docx
 first produces a document full of reasoning that then has to be scrubbed, and the scrubbing is what
-leaves the tell-tale seams.
+leaves the tell-tale seams. Phase 1 now includes reading the client's own source and API docs;
+skipping it is what puts an 8–10 person-day "preliminary experiment" into the WBS for no reason.
 
 ### 0. Intake — ask before writing
 
@@ -63,7 +67,30 @@ Chapter 1 is the longest and carries every external claim. Collect first, write 
 - 各数値に「該当箇所 / 内容 / 出典」の 3 列を持たせ、そのまま付録 D になる形で貯める
 - 他社実績と自社実績を混ぜない。報道ベースは採用しないか、報道と明示する
 
-**出力**: 出典表（付録 D の原型）。
+#### 顧客の実装と API を先に読む — 「予備実験」を WBS に入れる前に
+
+「着手直後に予備実験を行う」と書いたタスクは、**公開情報を読めば消えることが多い**。
+実際に、8〜10 人日の予備実験タスクが丸ごと不要になった。読む対象:
+
+- 顧客の API ドキュメント（注文種別、状態遷移、エラー、レート制限、**配信保証の有無**）
+- 顧客が公開している OSS 実装のソース（何を検証していて、何を検証していないか）
+- 採用予定ライブラリのソース（型の精度、拡張の制約。ドキュメントより正確）
+
+読んだ結果は提案書に「**公開情報で確認済みの事項**」の表として載せる（確認したこと / 根拠 / 帰結）。
+工数が減り、着手時に前提が揃い、**調べてきたことが相手に伝わる**。
+
+そして確認事項の書き方が変わる。**抽象的に尋ねるのではなく、こちらの理解を書いて正誤を問う。**
+
+```
+✗ 執行イベントの配信保証について教えてください。
+✓ private stream は配信順序を保証せず、シーケンス番号もありません。したがって受信側は
+   注文 ID ごとに最新の状態を真値として保持する設計になります。この理解で正しいですか。
+   欠落があり得る場合、REST による定期リコンサイルで問題ないでしょうか。
+```
+
+回答者は「はい／いいえ」と差分だけ書けばよくなる。相手の負担が下がり、回答率が上がる。
+
+**出力**: 出典表（付録 D の原型）＋「公開情報で確認済みの事項」表。
 
 ### 2. Source docs — the private set
 
@@ -110,6 +137,16 @@ Validates every XML part, counts outline levels, greps the banned vocabulary, me
 sentence-ending monotony, flags unqualified superlatives, finds cross-references that point at
 missing headings, and reports numeric drift. **BLOCKER が 0 になるまで外部レビューに回さない** —
 機械で見つかる指摘に人間のレビューラウンドを使わない。
+
+**分量もここで見る。** `preflight_check.py` が推定ページ数を出す。30 ページを超えていたら、
+外部レビューに回す前に本編と技術別紙へ割る。レビュー後に割ると参照が総崩れになる。
+
+図は別に検査する。`figure_preflight.py` が、**指定した太字が実際に効いているか**を報告する。
+可変フォントしか無い環境では `fontweight="bold"` が黙って無視される。
+
+```bash
+uv run --quiet --with pillow --with matplotlib python figure_preflight.py figures/*.png
+```
 
 ### 7. Review loop — blocking
 
@@ -229,11 +266,46 @@ budget from that. Put the input cells in the workbook instead (yellow fill), inc
 
 - Headings need real outline levels or the navigation pane and Google Docs outline stay empty.
   `HeadingLevel` alone is not enough — the default heading style overrides your design, so set the
-  run formatting explicitly as well (`references/toolchain.md`)
+  run formatting explicitly as well (`references/toolchain.md`). In python-docx, append
+  `w:outlineLvl` to the heading's `pPr` yourself
+- **Markdown → docx: join wrapped source lines into one paragraph.** A converter that emits one
+  paragraph per line inflates the document by 30–40% and splits sentences visually
+- **Count literal `**` in the generated file and require 0.** Inline emphasis that spans a source
+  line leaks the asterisks into the client's document
 - Tables need both `columnWidths` and a `width` on every cell
 - A proposal to a financial institution needs a 作業規則 section: prohibited operations, access
   control, work logs, immediate reporting of critical findings, incident notification deadlines,
   subcontracting, data residency, backup erasure, liability, background IP
+
+---
+
+### 9. Length is a design constraint, not an outcome
+
+Decide the budget before writing: **本編 25〜30 ページ、技術別紙 15〜25 ページ、工程表は xlsx**.
+Anything the reader does not need in order to *decide* goes to the 別紙. Task-level effort and the
+weekly Gantt never appear in the body — the workbook holds them.
+
+A 60-page proposal does not read as thorough. It reads as something the sender did not curate.
+`references/document-skeleton.md` has what goes where, and how to cut when you overshoot.
+
+### 10. Every option must reach the goal
+
+When you offer 3 price/duration options, do **not** build them as nested prefixes where the cheapest
+one stops halfway through the phase chain. Every option runs 仕様 → 実装 → 検証 → 公開 and produces
+the full deliverable set; what varies is **scope breadth and verification depth**. An option that
+cannot claim the objective is not an option — you have offered one plan and two excuses.
+
+### 11. State the mechanism; do not hand the judgement back
+
+「〜は御社の事業判断です」 ends a paragraph that should have contained an argument. Explain the
+structure — why the current constraint binds, what changes when it is removed — and leave only the
+genuinely unknowable (timing, magnitude, demand) as a stated condition.
+
+### 12. Background is facts; the proposal chapter carries the benefits
+
+Put 「what the client gets」 in the background chapter and you will write it twice. Chapter 1 says
+what is happening and what is not currently covered. Chapter 2 says the goal, why it comes first,
+the claim with its falsification condition, and what follows as a by-product.
 
 ---
 
@@ -280,8 +352,17 @@ Templates in `assets/`. Run from a directory holding the assets and any figure P
 ```bash
 npm install docx                                            # docx-js
 node make_docx.js                                           # → proposal .docx
-uv run --quiet --with openpyxl python make_xlsx.py          # → WBS/Gantt/estimate .xlsx
+uv run --quiet --with openpyxl python make_schedule.py      # → schedule .xlsx（唯一の出典）
+uv run --quiet --with openpyxl python make_schedule.py --md # → 本文に貼る表
+uv run --quiet --with openpyxl python make_xlsx.py          # → WBS/estimate .xlsx
+uv run --quiet python preflight_check.py proposal.docx      # BLOCKER 0 が外部レビューの前提
+uv run --quiet --with pillow --with matplotlib python figure_preflight.py figures/*.png
 ```
+
+`make_schedule.py` holds the task table, the effort ratios, the buffer ratio and the milestone dates
+in one place, and emits both the workbook and the markdown tables you paste into the body. Editing
+the body table by hand is how 425 and 447 person-days ended up in the same document for three
+revisions.
 
 `assets/make_docx.js` ships the helpers you need: cover page, `h1/h2/h3` with working outline levels,
 `p`, `bullet`, `note`, `table` (dual-width, safe shading), `code`, `figure` (ImageRun), `caption`,
@@ -336,6 +417,8 @@ Full notes, including where the OAuth token lives, in `references/toolchain.md`.
 - `references/review-loop.md` — prompt templates for each round, triage rules, convergence
 - `references/toolchain.md` — docx-js / openpyxl / matplotlib / rclone / Drive API pitfalls
 - `assets/make_docx.js`, `assets/make_xlsx.py` — generator skeletons (runnable as-is)
+- `assets/make_schedule.py` — single-source schedule: tasks → xlsx Gantt + markdown tables
+- `assets/figure_preflight.py` — font weight, stroke width and B&W legibility of every PNG
 - `assets/preflight_check.py` — pre-review self-check; exits non-zero on a blocker
 
 ## Related skills
