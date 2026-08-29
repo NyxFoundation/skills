@@ -20,7 +20,7 @@ duplicated, never mirrored into this repo.
 | `creative/` | Narrative design, viral copywriting, and visualization — narrative-heat-engineering (NHE), emotion-curve-feedback, narrative-content-writing, viral-tweet (X), prtimes-press-release, youtube-title-description, [visually-3d](https://github.com/NyxFoundation/visually-3d) |
 | `devops/` | Environment and operations workflows (nixos-environment, devops-workflows, mordred-hermes-setup) |
 | `formal-methods/` | Formal specification and verification ([docs2formalspec](https://github.com/NyxFoundation/docs2formalspec)) |
-| `presentation/` | Slidev deck authoring and figures (slide, arch-diagram, animated-concept-slide, editorial-figures) |
+| `presentation/` | Slidev deck authoring, figures, and stage delivery (slide, arch-diagram, animated-concept-slide, editorial-figures, panel-moderator-script) |
 | `productivity/` | Client-facing proposal + WBS authoring (pmbok-proposal-wbs), event management, Notion workflow optimization, Slack integration |
 | `research/` | Formalization research programs, research-to-repo workflow, LaTeX editing craft |
 | `security/` | Specification-anchored security auditing ([speca](https://github.com/NyxFoundation/speca)) |
