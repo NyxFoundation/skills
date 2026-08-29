@@ -79,7 +79,7 @@ Ask the unanswered ones in one batch, propose a default, start on defaults if to
 ### 4. 声に出す文を書く
 
 `references/spoken-japanese.md`。**読み上げ文に太字を入れない。**一文は読点で息継ぎできる長さ。
-フリ・受け・つなぎ・予告の 4 動作で組む。**受けを書き忘れるのがいちばん多い欠陥。**
+地ならし・フリ・受け・つなぎ・予告の 5 動作で組む。**受けを書き忘れるのがいちばん多い欠陥。**
 
 ### 5. 機械検査
 
@@ -171,7 +171,7 @@ python assets/spoken_check.py script.md      # 太字・長文・受け・地な
 
 | File | 内容 |
 |---|---|
-| `references/frameworks.md` | toss / tag / tease と Powerful Panels の task order、4 動作の定義、時間配分表 |
+| `references/frameworks.md` | toss / tag / tease と Powerful Panels の task order、5 動作の定義、時間配分の式 |
 | `references/spoken-japanese.md` | 声に出す文の書き方。AI 臭の 8 つの兆候と、それぞれの直し方 |
 | `references/question-design.md` | 5 つの規準と 3 つの禁止。鋭さと答えやすさを両立させる書き換え表 |
 | `references/artifact-split.md` | 司会台本と登壇者ページの分け方。何を出して何を出さないか |
