@@ -17,12 +17,18 @@
   8. ぼかし                      司会は言い切る
   9. 埋め忘れ                    ◯◯ / △△ / TBD が読み上げ文に残っている
                                  穴は 〔　〕 で書く。◯◯ だと、そのまま読み上げてしまう
+ 10. 尺と文量が合わない          見出しに「3 分」と書いてあるのに、実際は 6 分ぶんの文がある
+                                 日本語 300 字/分、英語 150 語/分で見積もる
 """
 import argparse
 import re
 import sys
 
 SEC_RE = re.compile(r"^## +(.+)$")
+SUB_RE = re.compile(r"^### +([^（(\n]+)[（(]([^）)\n]*)[）)]", re.M)
+MIN_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(?:分|min)")
+# 音読の速さ。日本語は 1 分 300 字、英語は 1 分 150 語。司会は間を取るのでやや遅め
+JA_CPM, EN_WPM = 300.0, 150.0
 TIME_RE = re.compile(r"\d{1,2}:\d{2}\s*[–\-−~〜]\s*\d{1,2}:\d{2}")
 BOLD_RE = re.compile(r"\*\*[^*]+\*\*")
 HEDGE_RE = re.compile(r"かもしれません|と思われます|一般的には|なのではないでしょうか")
@@ -175,6 +181,26 @@ def main() -> int:
             if HEDGE_RE.search(ln):
                 bad.append(f"{label}: ぼかし → {ln[:38]}")
                 break
+        # 見出しの分数と、実際の文量が合っているか
+        for h, spec in SUB_RE.findall(body):
+            mm = MIN_RE.search(spec)
+            if not mm:
+                continue
+            declared = float(mm.group(1))
+            part = body.split(f"### {h}({spec})")[-1] if f"### {h}({spec})" in body else ""
+            if not part:
+                part = body.split(f"### {h}（{spec}）")[-1]
+            part = part.split("\n### ")[0]
+            plines = spoken_lines(part)
+            txt = re.sub(r"<br\s*/?>", "", " ".join(plines))
+            if not txt:
+                continue
+            ascii_ratio = sum(c.isascii() for c in txt) / max(1, len(txt))
+            est = (len(txt.split()) / EN_WPM) if ascii_ratio > 0.8 else (len(txt) / JA_CPM)
+            if est > declared * 1.15:
+                bad.append(f"{label} / {h.strip()[:18]}: 文量が尺を超えている"
+                           f"（表記 {declared:.0f} 分・実測 {est:.1f} 分）")
+
         for ln in lines:
             if BLANK_RE.search(ln):
                 bad.append(f"{label}: 読み上げ文に埋め忘れの記号 → {ln[:38]}"
