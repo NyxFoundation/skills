@@ -8,7 +8,8 @@
 検出するもの:
   1. 読み上げ文の太字            声に太字はない。書き物の体裁のまま喋らせている
   2. 一文が長い                  読点で息継ぎできる長さにする（既定 60 字）
-  3. 受けが無いセッション        答えを客席の言葉に置き直す動作。**いちばん抜ける**
+  3. 受けが足りないセッション    答えを客席の言葉に置き直す動作。**いちばん抜ける**
+                                 セッションに 1 つあれば OK ではない。**ラウンドごとに要る**
   4. 地ならしが無いセッション    いま何が起きているかの説明。**2 番目に抜ける**
   5. 挙手が無いセッション        60 秒で客席が自分ごとになるかが決まる
   6. 拍手を促していない          言わないと客席はタイミングを迷う
@@ -35,6 +36,9 @@ HAND_HINT = ("手を挙げ", "挙げていただけますか", "show of hands", 
              "手を下ろし", "keep your hand up")
 CLAP_HINT = ("拍手", "applause", "thanking our panel")
 CALL_HINT = ("みなさん", "皆さん", "everyone", "this room")
+# 受けの構造ラベル。ラウンド数と突き合わせて「足りているか」を見る
+TAG_LABEL = ("**受け**", "**受け（", "*Bridge:*", "**Bridge**")
+ROUND_RE = re.compile(r"^### +(第 \d+ ラウンド[^\n]*|One question each[^\n]*)$", re.M)
 
 
 def spoken_lines(body: str):
@@ -66,6 +70,17 @@ def structure_markers(body: str) -> str:
         elif depth == 0 and not s.startswith(">"):
             out.append(s)
     return "\n".join(out)
+
+
+def rounds_of(body: str):
+    """ラウンドの見出しごとに、その見出しから次の ### までを返す。"""
+    parts = re.split(r"\n(?=### )", body)
+    out = []
+    for part in parts:
+        head = part.split("\n", 1)[0]
+        if ROUND_RE.match(head):
+            out.append((head[4:].strip(), part))
+    return out
 
 
 def sentences(line: str):
@@ -133,8 +148,17 @@ def main() -> int:
             else:
                 continue
             break
-        if "no-tag" not in opts and not any(h.lower() in hay for h in TAG_HINT):
-            bad.append(f"{label}: **受けが無い**（答えを客席の言葉に置き直す動作）")
+        # 受けは「セッションに 1 つあれば OK」ではない。**ラウンドごとに要る。**
+        # 第 1 ラウンドにだけ書いて、第 2・第 3 と山場で飛ばすのが定番の抜け方。
+        # 数を数えるだけでは足りない（1 つの回に 2 つあると、別の回のゼロを埋めてしまう）
+        if "no-tag" not in opts:
+            if not any(h.lower() in hay for h in TAG_HINT):
+                bad.append(f"{label}: **受けが無い**（答えを客席の言葉に置き直す動作）")
+            else:
+                for rname, rbody in rounds_of(body):
+                    if not any(h.lower() in rbody.lower() for h in TAG_LABEL):
+                        bad.append(f"{label} / {rname[:20]}: **受けが無い**"
+                                   f"（このラウンドに受けの見出しがない）")
         if "no-setup" not in opts and not any(h.lower() in hay for h in SETUP_HINT):
             bad.append(f"{label}: **地ならしが無い**（いま何が起きているかの説明）")
         if "no-hands" not in opts and not any(h.lower() in hay for h in HAND_HINT):
