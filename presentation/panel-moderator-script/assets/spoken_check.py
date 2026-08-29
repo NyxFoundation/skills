@@ -15,6 +15,8 @@
   6. 拍手を促していない          言わないと客席はタイミングを迷う
   7. 呼びかけが無い              「みなさん」が一度も出てこない
   8. ぼかし                      司会は言い切る
+  9. 埋め忘れ                    ◯◯ / △△ / TBD が読み上げ文に残っている
+                                 穴は 〔　〕 で書く。◯◯ だと、そのまま読み上げてしまう
 """
 import argparse
 import re
@@ -24,6 +26,8 @@ SEC_RE = re.compile(r"^## +(.+)$")
 TIME_RE = re.compile(r"\d{1,2}:\d{2}\s*[–\-−~〜]\s*\d{1,2}:\d{2}")
 BOLD_RE = re.compile(r"\*\*[^*]+\*\*")
 HEDGE_RE = re.compile(r"かもしれません|と思われます|一般的には|なのではないでしょうか")
+# 穴埋めは 〔　〕 で書く。◯◯ や △△ や TBD が読み上げ文に残っていたら、そのまま読み上げる事故になる
+BLANK_RE = re.compile(r"[◯○◎]{2}|[△▲]{2}|\bTBD\b|＿＿")
 # 受け・地ならし・挙手・拍手・呼びかけの検出語
 TAG_HINT = ("つまり", "ということですね", "ということでした", "言い換える",
             "もう一度だけ", "分かったことがあります", "受け", "Bridge", "bridge")
@@ -170,6 +174,11 @@ def main() -> int:
         for ln in lines:
             if HEDGE_RE.search(ln):
                 bad.append(f"{label}: ぼかし → {ln[:38]}")
+                break
+        for ln in lines:
+            if BLANK_RE.search(ln):
+                bad.append(f"{label}: 読み上げ文に埋め忘れの記号 → {ln[:38]}"
+                           f"（穴は 〔　〕 で書く）")
                 break
         print(f"{label:<42} 読み上げ {len(lines):3} 行")
 
