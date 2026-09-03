@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}} — demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ================= engine (core/engine.css) ================= */
+{{ENGINE_CSS}}
+/* ================= surface: {{SURFACE}} (surfaces/{{SURFACE}}/surface.css) ================= */
+{{SURFACE_CSS}}
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <div>{{TITLE}} · demo storyboard · <span id="tick">00.0s</span></div>
+  <div class="steps" id="steps"></div>
+</div>
+
+<div class="stage-wrap"><div class="stage" id="stage">
+{{SURFACE_HTML}}
+  <div class="cap"><span></span></div>
+  <svg class="link" id="link" width="1600" height="1000" viewBox="0 0 1600 1000"><path id="lp" d=""/><circle id="c1" r="3.5"/><circle id="c2" r="3.5"/></svg>
+</div></div>
+
+<script>
+/* ================= engine (core/engine.js) ================= */
+{{ENGINE_JS}}
+/* ================= surface helpers (surfaces/{{SURFACE}}/surface.js) ================= */
+{{SURFACE_JS}}
+/* ================= storyboard — EDIT THIS ================= */
+{{STORYBOARD_JS}}
+</script>
+</body>
+</html>

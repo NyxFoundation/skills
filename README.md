@@ -17,7 +17,7 @@ duplicated, never mirrored into this repo.
 | Directory | Contents |
 |---|---|
 | `autonomous-ai-agents/` | Multi-agent orchestration (kanban-multi-agent) |
-| `creative/` | Narrative design, viral copywriting, and visualization — narrative-heat-engineering (NHE), emotion-curve-feedback, narrative-content-writing, viral-tweet (X), prtimes-press-release, youtube-title-description, [visually-3d](https://github.com/NyxFoundation/visually-3d) |
+| `creative/` | Narrative design, viral copywriting, and visualization — narrative-heat-engineering (NHE), emotion-curve-feedback, narrative-content-writing, viral-tweet (X), prtimes-press-release, youtube-title-description, demo-video, [visually-3d](https://github.com/NyxFoundation/visually-3d) |
 | `devops/` | Environment and operations workflows (nixos-environment, devops-workflows, mordred-hermes-setup) |
 | `formal-methods/` | Formal specification and verification ([docs2formalspec](https://github.com/NyxFoundation/docs2formalspec)) |
 | `presentation/` | Slidev deck authoring, figures, and stage delivery (slide, arch-diagram, animated-concept-slide, editorial-figures, panel-moderator-script) |

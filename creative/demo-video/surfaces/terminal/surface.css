@@ -1,0 +1,59 @@
+/* ===== surface: terminal — full-screen shell session with a run panel ===== */
+:root{
+  --bg:#0f1116; --bg2:#151922; --bg3:#1b2029; --line:#232935;
+  --fg:#d7dce5; --dim:#7c8798; --stage-bg:#0f1116;
+  --p:#7ee787; --a:#58a6ff; --h:#ffffff; --w:#e3b341; --e:#ff7b72; --ok:#3fb950; --accent2:#5fd7d7;
+}
+.stage{display:grid;grid-template-rows:40px 1fr 26px}
+
+.titlebar{display:flex;align-items:center;gap:14px;background:#1a1f29;border-bottom:1px solid var(--line);padding:0 14px;color:#c3cbd8;font-size:12.5px;position:relative}
+.titlebar .dots i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px}
+.titlebar .dots i:nth-child(1){background:#ff5f57}.titlebar .dots i:nth-child(2){background:#febc2e}.titlebar .dots i:nth-child(3){background:#28c840}
+.titlebar .wtabs{display:flex;gap:2px;margin-left:6px}
+.titlebar .wtab{padding:5px 14px;border-radius:6px 6px 0 0;color:#8b95a6;font-size:12px}
+.titlebar .wtab.on{background:var(--bg);color:#fff}
+.titlebar .center{position:absolute;left:50%;transform:translateX(-50%);color:#8b95a6;font:12px var(--mono)}
+
+.body{display:grid;grid-template-columns:1fr 0fr;transition:grid-template-columns .7s cubic-bezier(.2,.8,.2,1);min-height:0}
+.stage.split .body{grid-template-columns:1fr .42fr}
+
+/* an absolutely positioned scroller needs overflow:auto for scrollTop=1e9 to work */
+.termwrap{position:relative;min-width:0;overflow:hidden}
+.term{position:absolute;inset:0;padding:18px 26px 24px;font:15px/1.75 var(--mono);color:var(--fg);overflow:auto;scrollbar-width:none}
+.term::-webkit-scrollbar{display:none}
+.term .ln2{white-space:pre-wrap;min-height:26px}
+.term .p{color:var(--p)}.term .d{color:var(--dim)}.term .h{color:var(--h);font-weight:500}
+.term .w{color:var(--w)}.term .e{color:var(--e)}.term .k{color:var(--ok)}.term .a{color:var(--a)}
+.term .box{display:inline-block;border:1px solid var(--line);border-left:3px solid var(--a);border-radius:6px;background:var(--bg2);padding:8px 16px;margin:6px 0;font-size:14px;line-height:1.7}
+.term .kv b{color:#fff;font-weight:500}
+.term .bar{display:inline-block;width:220px;height:6px;border-radius:3px;background:#222836;vertical-align:1px;overflow:hidden}
+.term .bar i{display:block;height:100%;width:0;background:var(--a);transition:width .9s linear}
+
+/* right-hand run panel: the plan the tool is executing */
+.side{background:var(--bg2);border-left:1px solid var(--line);display:grid;grid-template-rows:34px 1fr auto;min-width:0;overflow:hidden}
+.side .sh{display:flex;justify-content:space-between;align-items:center;padding:0 16px;font:11px var(--ui);letter-spacing:.08em;color:#8b95a6;border-bottom:1px solid var(--line)}
+.tasks{padding:12px 16px;font:13px/1.5 var(--ui);overflow:hidden}
+.task{display:grid;grid-template-columns:18px 1fr auto;gap:9px;align-items:center;padding:6px 0;color:#8b95a6;transition:color .3s}
+.task>i{width:13px;height:13px;border-radius:50%;border:1.5px solid #39424f;display:block;position:relative}
+.task>b{font:11.5px var(--mono);color:#5b6472;font-weight:400}
+.task.run{color:#dbe2ec}.task.run>i{border-color:var(--a);border-right-color:transparent;animation:spin .9s linear infinite}
+.task.ok{color:#b9c2ce}.task.ok>i{border-color:var(--ok);background:var(--ok)}
+.task.ok>i::after{content:"";position:absolute;left:3.5px;top:1px;width:4px;height:7px;border:solid #0f1116;border-width:0 1.6px 1.6px 0;transform:rotate(45deg)}
+.task.bad{color:#ffd7d3}.task.bad>i{border-color:var(--e);background:var(--e)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.side .card{margin:0 16px 16px;border:1px solid var(--line);border-radius:8px;background:var(--bg3);padding:12px 14px;font:12.5px/1.6 var(--ui);color:#c3cbd8;opacity:0;transform:translateY(8px);transition:opacity .45s,transform .45s}
+.side .card.lit{opacity:1;transform:none}
+.side .card .big{font:26px/1.1 var(--ui);font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
+.side .card .lbl{font-size:11px;letter-spacing:.06em;color:#7c8798;margin-bottom:6px}
+.side .card .row{display:flex;justify-content:space-between;padding:3px 0;border-top:1px solid var(--line);margin-top:6px}
+.side .card .row:first-of-type{border-top:0;margin-top:0}
+.side .card .good{color:var(--ok)}.side .card .bad{color:var(--e)}
+
+.statusline{display:flex;align-items:center;gap:0;background:#1a1f29;border-top:1px solid var(--line);font:11.5px var(--mono);color:#8b95a6}
+.statusline .it{padding:0 12px;height:26px;display:flex;align-items:center;gap:7px}
+.statusline .it.sess{background:var(--a);color:#0b0e14;font-weight:500}
+.statusline .it.right{margin-left:auto}
+.statusline .num{font-variant-numeric:tabular-nums;color:#c3cbd8}
+.stage.busy .statusline .it.sess{animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}

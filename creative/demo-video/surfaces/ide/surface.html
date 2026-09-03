@@ -1,0 +1,78 @@
+  <div class="titlebar">
+    <span class="dots"><i></i><i></i><i></i></span>
+    <span class="menu"><span>File</span><span>Edit</span><span>Selection</span><span>View</span><span>Go</span><span>Run</span><span>Terminal</span><span>Help</span></span>
+    <span class="center"><b>main.ext</b> — project-name</span>
+  </div>
+
+  <div class="frame">
+    <div class="activity">
+      <i class="on"><svg viewBox="0 0 24 24"><path d="M4 4h7l2 2h7v13H4z"/></svg></i>
+      <i><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></svg></i>
+      <i><svg viewBox="0 0 24 24"><path d="M6 3v18M6 9c6 0 6 6 12 6M18 3v6"/><circle cx="6" cy="3" r="1.5"/><circle cx="18" cy="3" r="1.5"/><circle cx="6" cy="21" r="1.5"/></svg></i>
+      <i><svg viewBox="0 0 24 24"><path d="M8 4l-5 8 5 8M16 4l5 8-5 8"/></svg></i>
+      <i style="margin-top:auto;margin-bottom:8px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg></i>
+    </div>
+
+    <div class="explorer">
+      <div class="hd">EXPLORER</div>
+      <div class="proj">▾ PROJECT-NAME</div>
+      <!-- file row: <div class="row" style="padding-left:32px"><span class="ic" style="background:#2a2f4a;color:#8da4ff">S</span>file.ext<span class="b">3</span></div> -->
+      <div class="row" style="padding-left:16px">▾ src</div>
+      <div class="row sel" style="padding-left:32px"><span class="ic" style="background:#2a2f4a;color:#8da4ff">S</span>main.ext</div>
+      <div class="outline">OUTLINE</div>
+    </div>
+
+    <div class="work">
+      <div class="editors">
+        <div class="ed" id="mainEd">
+          <div class="tabs"><div class="tab on">main.ext<span class="x">×</span></div></div>
+          <div class="crumbs"><span>src</span><span>main.ext</span></div>
+          <div class="codewrap">
+<pre id="mainPre">
+<div class="ln"><i>1</i><u></u><code><span class="c">// paste real, plausible code here — one .ln per line, hand-tag tokens with .k .t .f .v .s .n .c .ct</span></code></div>
+<div class="ln warn" id="W1"><i>2</i><u></u><code><span class="sk">wrap the struck-through part in .sk</span><span class="hint">warn hint · short reason</span></code></div>
+<div class="ln err" id="E1"><i>3</i><u></u><code><span class="sq">squiggled symbol</span> rest of line<span class="hint">error hint</span></code>
+  <div class="lens"><b>tool</b> · 1 issue<span class="act">Quick fix</span></div>
+  <div class="peek" id="peek1"><div class="hd"><b>Title</b><span>location · meta</span></div><div>Explanation.</div><div class="trace"><span class="st">state</span>1&nbsp; <b>step</b><br><span class="st"><em>bad state</em></span>2&nbsp; <b>step</b></div><span class="btn">Apply fix</span></div>
+</div>
+<div class="ln insert ok" id="INS"><i>4</i><u></u><code><span id="typed"></span><span class="hint">added by tool</span></code></div>
+<div class="ln"><i>4</i><u></u><code>more code</code></div>
+</pre>
+            <div class="minimap" id="mm"><div class="vp" id="vp" style="top:8px"></div></div>
+          </div>
+        </div>
+
+        <div class="ed side-ed" id="sideEd">
+          <div class="tabs"><div class="tab on">spec.ext<span class="x">×</span></div></div>
+          <div class="crumbs"><span>spec</span><span>spec.ext</span></div>
+<pre style="padding-bottom:10px">
+<div class="ln info" id="S1"><i>1</i><u></u><code>secondary pane code<span class="hint">link hint</span></code></div>
+</pre>
+          <div class="infoview">
+            <div class="ih"><span>INFO PANEL · spec.ext:1:1</span><span>tool 0.1.0</span></div>
+            <div class="blk on" id="iv0"><div class="sub">waiting…</div></div>
+            <div class="blk" id="iv1"><div class="bad">✗ something</div></div>
+            <div class="blk" id="iv2"><div class="ok">✓ everything</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ptabs"><span id="tProb">PROBLEMS<span class="cnt" id="pcnt">0</span></span><span>OUTPUT</span><span class="on" id="tTerm">TERMINAL</span></div>
+        <div class="pbody">
+          <div class="term" id="term"></div>
+          <div class="problems" id="problems">
+            <div class="grp"><b>main.ext</b> src · 2</div>
+            <div class="row" id="p1"><i class="w"></i><span>warning text</span><span class="loc">[2, 1]</span></div>
+            <div class="row" id="p2"><i class="e"></i><span>error text</span><span class="loc">[3, 1]</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status">
+    <span class="it rm">⌥</span><span class="it">⑂ main</span><span class="it" id="stErr">⊗ 0 &nbsp;⚠ 0</span>
+    <span class="it tool"><span>◆ tool</span><span class="bar"><i></i></span><span id="stMsg">idle</span><span class="num" id="num"></span></span>
+    <span class="it">Ln 1, Col 1</span><span class="it">Spaces: 4</span><span class="it">UTF-8</span><span class="it">LF</span><span class="it" id="stLang">Language</span>
+  </div>

@@ -1,0 +1,47 @@
+/* ===== demo engine — surface-agnostic ==================================
+   Everything here is about the *stage*, not about what is drawn on it.
+   A surface pack adds its own palette + chrome in surfaces/<name>/surface.css.
+   ====================================================================== */
+:root{
+  --ui:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --page:#0d0d0f;          /* letterbox around the stage */
+  --stage-bg:#1e1e1e;      /* surface overrides */
+  --fg:#d4d4d4; --dim:#858585;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--fg);font-family:var(--ui);height:100%}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;min-height:100vh}
+
+/* ---- authoring controls (hidden with ?rec=1) ---- */
+.controls{width:min(1600px,100%);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--dim)}
+.controls .steps{display:flex;gap:6px;flex-wrap:wrap}
+.controls button{font:inherit;font-size:12px;color:var(--dim);background:#141416;border:1px solid #2a2a2e;border-radius:6px;padding:5px 11px;cursor:pointer}
+.controls button[aria-current="step"]{color:#fff;border-color:#4a4a52;background:#1f1f24}
+body.rec .controls{display:none} body.rec{padding:0}
+
+/* ---- fixed 1600x1000 stage, scaled to fit the viewport ---- */
+.stage-wrap{width:min(1600px,100%);aspect-ratio:16/10;position:relative}
+.stage{position:absolute;inset:0;transform-origin:top left;width:1600px;height:1000px;background:var(--stage-bg);
+  border-radius:8px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);font-size:13px}
+body.rec .stage{border-radius:0;box-shadow:none}
+
+/* ---- blinking caret (typing) ---- */
+.caret{display:inline-block;width:1.5px;height:16px;background:#aeafad;vertical-align:-3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ---- connector overlay: the SVG needs explicit width/height or it defaults to 300x150 ---- */
+.link{position:absolute;inset:0;pointer-events:none;z-index:20}
+.link path{fill:none;stroke:var(--accent2,#5fd7d7);stroke-width:1.6;stroke-dasharray:6 4;opacity:0}
+.link circle{fill:var(--accent2,#5fd7d7);opacity:0}
+.link.open path{opacity:.95;animation:dash 1.2s linear infinite}
+.link.open circle{opacity:1}
+@keyframes dash{to{stroke-dashoffset:-20}}
+
+/* ---- caption strip (optional narration under the chrome) ---- */
+.cap{position:absolute;left:0;right:0;bottom:52px;display:flex;justify-content:center;z-index:19;pointer-events:none}
+.cap span{background:rgba(12,12,14,.86);border:1px solid rgba(255,255,255,.09);border-radius:8px;padding:9px 18px;
+  font:15px/1.4 var(--ui);color:#eee;opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;max-width:70%}
+.cap.on span{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

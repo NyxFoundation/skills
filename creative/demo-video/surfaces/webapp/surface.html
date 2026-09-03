@@ -1,0 +1,76 @@
+  <div class="browser">
+    <div class="btabs">
+      <div class="btab on"><span class="fav"></span>Product — Dashboard<span class="x">×</span></div>
+      <div class="btab"><span class="fav" style="background:#9aa4b5"></span>Docs</div>
+    </div>
+    <div class="bbar">
+      <span class="nav">←&nbsp;&nbsp;→&nbsp;&nbsp;⟳</span>
+      <span class="url"><span class="lock">🔒</span>app.product.com<b>/runs</b></span>
+      <span class="av"></span>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="sidenav">
+      <div class="logo"><i></i>Product</div>
+      <div class="n on"><span class="dot"></span>Runs</div>
+      <div class="n"><span class="dot"></span>Sources</div>
+      <div class="n"><span class="dot"></span>Rules</div>
+      <div class="n"><span class="dot"></span>Team</div>
+      <div class="foot">v2.4.0 · workspace</div>
+    </div>
+
+    <div class="main">
+      <div class="hdr">
+        <div><h1>Runs</h1></div>
+        <div class="sub" id="stMsg">idle</div>
+        <div class="search">Search…</div>
+        <div class="btn" id="cta">Run check</div>
+      </div>
+      <div class="prog"><i></i></div>
+
+      <div class="canvas">
+        <div class="kpis">
+          <div class="kpi" id="k1"><div class="lbl">LABEL</div><div class="val" id="k1v">0</div><div class="delta">+0%</div></div>
+          <div class="kpi" id="k2"><div class="lbl">LABEL</div><div class="val" id="k2v">0</div><div class="delta">+0%</div></div>
+          <div class="kpi" id="k3"><div class="lbl">LABEL</div><div class="val" id="k3v">0</div><div class="delta bad">0</div></div>
+          <div class="kpi" id="k4"><div class="lbl">LABEL</div><div class="val" id="k4v">0</div><div class="delta">+0%</div></div>
+        </div>
+
+        <div class="tablewrap">
+          <div class="th"><span></span><span>NAME</span><span>SOURCE</span><span>OWNER</span><span>STATUS</span><span class="num">AMOUNT</span></div>
+          <div class="trows" id="rows">
+            <!-- row template — keep 8–12 of them so the table looks lived-in -->
+            <div class="trow" id="r1"><span></span><span class="who"><i></i>record one</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r2"><span></span><span class="who"><i></i>record two</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r3"><span></span><span class="who"><i></i>record three</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r4"><span></span><span class="who"><i></i>record four</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r5"><span></span><span class="who"><i></i>record five</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r6"><span></span><span class="who"><i></i>record six</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r7"><span></span><span class="who"><i></i>record seven</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r8"><span></span><span class="who"><i></i>record eight</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r9"><span></span><span class="who"><i></i>record nine</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r10"><span></span><span class="who"><i></i>record ten</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r11"><span></span><span class="who"><i></i>record eleven</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+            <div class="trow" id="r12"><span></span><span class="who"><i></i>record twelve</span><span class="mut">source</span><span class="mut">owner</span><span><span class="pill">queued</span></span><span class="num">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer" id="drawer">
+        <div><h2>Detail title</h2><div class="meta">record · source · 12:04</div></div>
+        <div class="block bad"><div class="k">WHAT HAPPENED</div>One sentence a user would nod at.</div>
+        <pre class="code">field: value
+other: value</pre>
+        <div class="block"><div class="k">EVIDENCE</div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0">step one<span class="mut">12:04:01</span></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0">step two<span class="mut">12:04:03</span></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;color:var(--err)">step three failed<span>12:04:04</span></div>
+        </div>
+        <div class="block good" id="dOk" style="display:none"><div class="k">AFTER</div>The thing is now fine.</div>
+        <div class="actions"><span class="primary">Apply fix</span><span class="sec">Ignore</span></div>
+      </div>
+
+      <div class="toast" id="toast"><i></i><span id="toastMsg">message</span></div>
+    </div>
+  </div>

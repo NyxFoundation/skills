@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>solidity-check-envelope — demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1e1e1e; --bg2:#252526; --bg3:#2d2d2d; --bg4:#333333; --line:#3c3c3c;
+    --fg:#d4d4d4; --dim:#858585; --dimmer:#5a5a5a;
+    --kw:#c586c0; --ty:#4ec9b0; --fn:#dcdcaa; --var:#9cdcfe; --str:#ce9178; --num:#b5cea8; --cm:#6a9955; --op:#d4d4d4; --ctl:#569cd6;
+    --redund:#c792ea; --gap:#f14c4c; --ok:#4ec994; --lean:#5fd7d7; --info:#3794ff;
+    --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --ui:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#0d0d0f;color:var(--fg);font-family:var(--ui);height:100%}
+  body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;min-height:100vh}
+
+  .controls{width:min(1600px,100%);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--dim)}
+  .controls .steps{display:flex;gap:6px;flex-wrap:wrap}
+  .controls button{font:inherit;font-size:12px;color:var(--dim);background:#141416;border:1px solid #2a2a2e;border-radius:6px;padding:5px 11px;cursor:pointer}
+  .controls button[aria-current="step"]{color:#fff;border-color:#4a4a52;background:#1f1f24}
+  body.rec .controls{display:none}
+  body.rec{padding:0;background:#0d0d0f}
+
+  /* fixed-size stage scaled to fit */
+  .stage-wrap{width:min(1600px,100%);aspect-ratio:16/10;position:relative}
+  .stage{position:absolute;inset:0;transform-origin:top left;width:1600px;height:1000px;background:var(--bg);border-radius:8px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);display:grid;grid-template-rows:38px 1fr 22px;font-size:13px}
+  body.rec .stage{border-radius:0;box-shadow:none}
+
+  .titlebar{display:flex;align-items:center;background:var(--bg4);border-bottom:1px solid #2b2b2b;padding:0 12px;color:#ccc;font-size:12.5px;position:relative}
+  .titlebar .dots i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px}
+  .titlebar .dots i:nth-child(1){background:#ff5f57}.titlebar .dots i:nth-child(2){background:#febc2e}.titlebar .dots i:nth-child(3){background:#28c840}
+  .titlebar .menu{margin-left:14px;display:flex;gap:16px;color:#bbb}
+  .titlebar .center{position:absolute;left:50%;transform:translateX(-50%);color:#999}
+  .titlebar .center b{color:#ccc;font-weight:500}
+
+  .frame{display:grid;grid-template-columns:48px 240px 1fr;min-height:0}
+  .activity{background:var(--bg4);display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:6px}
+  .activity i{width:48px;height:44px;display:grid;place-items:center;color:#858585;position:relative}
+  .activity i.on{color:#fff}
+  .activity i.on::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2px;background:#fff}
+  .activity svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .activity .cnt{position:absolute;right:8px;bottom:6px;background:var(--info);color:#fff;font-size:9.5px;border-radius:8px;padding:0 5px;min-width:16px;text-align:center;opacity:0;transition:opacity .3s}
+  .stage.s2 .activity .cnt{opacity:1}
+
+  .explorer{background:var(--bg2);border-right:1px solid #1b1b1b;font-size:13px;display:flex;flex-direction:column;min-height:0}
+  .explorer .hd{padding:10px 20px 8px;font-size:11px;color:#bbb;letter-spacing:.06em}
+  .explorer .proj{padding:4px 12px;font-weight:600;color:#ccc;font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .explorer .row{display:flex;align-items:center;gap:6px;padding:3px 8px;color:#ccc;white-space:nowrap}
+  .explorer .row.dir{color:#ccc}
+  .explorer .row.sel{background:#37373d}
+  .explorer .row .ic{width:16px;height:16px;border-radius:3px;display:inline-grid;place-items:center;font-size:9px;font-weight:700;font-family:var(--ui)}
+  .ic.sol{background:#2a2f4a;color:#8da4ff}.ic.lean{background:#1d3a3a;color:#5fd7d7}.ic.toml{background:#3a3a2a;color:#ddd}.ic.md{background:#2a3a4a;color:#7fb3ff}.ic.json{background:#3a3a2a;color:#e8d36e}
+  .explorer .row .b{margin-left:auto;font-size:11px;border-radius:9px;padding:0 6px;opacity:0;transition:opacity .4s}
+  .explorer .row .b.r{color:var(--redund)}.explorer .row .b.g{color:var(--gap);margin-left:4px}
+  .stage.s2 .explorer .row .b.r,.stage.s4 .explorer .row .b.g{opacity:1}
+  .stage.s5 .explorer .row .b.g{opacity:0}
+  .explorer .outline{margin-top:auto;border-top:1px solid #1b1b1b;padding:8px 20px 10px;font-size:11px;color:#bbb;letter-spacing:.06em}
+
+  .work{display:grid;grid-template-rows:1fr 260px;min-height:0}
+  .editors{display:grid;grid-template-columns:1fr 0fr;transition:grid-template-columns .7s cubic-bezier(.2,.8,.2,1);min-height:0}
+  .stage.lean .editors{grid-template-columns:1fr .72fr}
+  .ed{display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1px solid #1b1b1b;background:var(--bg)}
+  .tabs{display:flex;background:var(--bg2);height:35px;border-bottom:1px solid #1b1b1b;overflow:hidden}
+  .tab{display:flex;align-items:center;gap:7px;padding:0 14px;color:#969696;font-size:12.5px;border-right:1px solid #1b1b1b;white-space:nowrap}
+  .tab.on{background:var(--bg);color:#fff;border-top:1px solid var(--info);margin-bottom:-1px}
+  .tab .x{color:#777;margin-left:6px}
+  .crumbs{height:22px;display:flex;align-items:center;gap:6px;padding:0 16px;font-size:11.5px;color:#a0a0a0;background:var(--bg)}
+  .crumbs span+span::before{content:"›";margin-right:6px;color:#777}
+  .codewrap{position:relative;flex:1;min-height:0;display:grid;grid-template-columns:1fr 80px}
+  pre{margin:0;padding:6px 0 60px;font:13px/20px var(--mono);overflow:hidden;min-width:0;white-space:normal;scroll-behavior:smooth;position:relative}
+  .ln{display:grid;grid-template-columns:58px 20px 1fr;align-items:center;position:relative;height:20px;padding-right:12px}
+  .ln>i{color:var(--dimmer);text-align:right;padding-right:6px;font-style:normal;user-select:none;font-size:12px}
+  .ln>u{text-decoration:none;color:#666;text-align:center;font-size:10px}
+  .ln>code{white-space:pre;overflow:hidden;position:relative}
+  .ln.cur{background:#282828}
+  .ln.cur>i{color:#c6c6c6}
+  .k{color:var(--kw)} .t{color:var(--ty)} .f{color:var(--fn)} .v{color:var(--var)} .s{color:var(--str)} .n{color:var(--num)} .c{color:var(--cm)} .ct{color:var(--ctl)} .op{color:var(--op)}
+  .caret{display:inline-block;width:1.5px;height:16px;background:#aeafad;vertical-align:-3px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .minimap{background:var(--bg);border-left:1px solid #1b1b1b;padding:8px 6px;position:relative;overflow:hidden}
+  .minimap i{display:block;height:2px;margin:1px 0;background:#3a3a3a;border-radius:1px}
+  .minimap .vp{position:absolute;left:0;right:0;height:120px;background:rgba(255,255,255,.06);transition:top .6s}
+
+  /* diagnostics */
+  .lens{position:absolute;left:78px;top:-13px;font:10.5px/12px var(--ui);color:#999;opacity:0;transition:opacity .35s}
+  .lens b{color:#bbb;font-weight:500}
+  .lens .act{color:var(--info);margin-left:8px}
+  .on .lens{opacity:1}
+  .hint{position:absolute;right:6px;top:50%;transform:translate(8px,-50%);max-width:56%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:11.5px/18px var(--ui);color:var(--redund);opacity:0;transition:opacity .35s,transform .35s;padding:0 6px;background:linear-gradient(90deg,transparent,#1e1e1e 12px);}
+  .hint.gap{color:var(--gap)} .hint.ok{color:var(--ok)} .hint.lean{color:var(--lean)}
+  .hint::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:7px;vertical-align:1px;opacity:.9}
+  .r-line .hint,.g-line .hint,.l-line .hint,.ok-line .hint{opacity:0}
+  .on .r-line.lit .hint{opacity:1;transform:translate(0,-50%)}
+  .on .r-line.lit code>.sk{color:#6a6a6a;text-decoration:line-through;text-decoration-color:var(--redund);text-decoration-thickness:1.5px}
+  .on .r-line.lit code>.sk *{color:#6a6a6a}
+  .r-line::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:3px;background:var(--redund);opacity:0;transition:opacity .35s}
+  .on .r-line.lit::before{opacity:1}
+  .g-line .sq{text-decoration:underline wavy var(--gap);text-decoration-thickness:1.4px;text-underline-offset:4px;text-decoration-color:transparent;transition:text-decoration-color .35s}
+  .gap-on .g-line .sq{text-decoration-color:var(--gap)}
+  .gap-on .g-line .hint.gap{opacity:1;transform:translate(0,-50%)}
+  .g-line::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:3px;background:var(--gap);opacity:0;transition:opacity .35s}
+  .gap-on .g-line::before{opacity:1}
+  .fixed .g-line .sq{text-decoration-color:transparent}
+  .fixed .g-line .hint.gap{opacity:0}
+  .fixed .g-line::before{background:var(--ok)}
+  .fixed.typed-done .ok-line .hint.ok{opacity:1;transform:translate(0,-50%)}
+  .fixed .ok-line::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:3px;background:var(--ok)}
+  .ln.fix-line{height:0;overflow:hidden;transition:height .3s}
+  .fixed .ln.fix-line{height:20px}
+  .fix-line code .typed{white-space:pre}
+  .l-line::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:3px;background:var(--lean);opacity:0;transition:opacity .35s}
+  .gap-on .l-line::before{opacity:1}
+  .gap-on .l-line .hint.lean{opacity:1;transform:translate(0,-50%)}
+  .fixed .l-line::before{background:var(--ok)}
+  .fixed .l-line .hint.lean{color:var(--ok)}
+
+  .peek{position:absolute;left:78px;right:24px;top:calc(100% + 2px);z-index:6;background:#252526;border:1px solid #454545;border-left:3px solid var(--gap);border-radius:4px;padding:10px 14px 11px;font:12px/1.55 var(--ui);color:#ddd;box-shadow:0 12px 34px rgba(0,0,0,.55);opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .35s,transform .35s}
+  .peek .hd{display:flex;gap:10px;align-items:baseline;margin-bottom:6px}
+  .peek .hd b{color:#fff;font-weight:600}
+  .peek .hd span{color:#999;font-size:11px}
+  .peek .trace{font:11.5px/1.8 var(--mono);color:#bbb;background:#1b1b1b;border-radius:4px;padding:6px 10px;margin:6px 0}
+  .peek .trace b{color:#fff;font-weight:500}
+  .peek .trace em{color:var(--gap);font-style:normal}
+  .peek .trace .st{color:#777;float:right}
+  .peek .src{color:var(--lean);font-family:var(--mono);font-size:11.5px}
+  .peek .fix{margin-top:6px;color:#ccc}
+  .peek .fix code{font-family:var(--mono);color:#fff;background:#1b1b1b;padding:1px 6px;border-radius:3px;font-size:11.5px}
+  .peek .btn{display:inline-block;margin-top:9px;margin-right:8px;font-size:11.5px;padding:3px 10px;border-radius:3px;background:#0e639c;color:#fff}
+  .peek .btn.sec{background:#3a3d41}
+  .gap-on:not(.fixed) .peek{opacity:1;transform:none}
+
+  /* svg link overlay */
+  .link{position:absolute;inset:0;pointer-events:none;z-index:7}
+  .link path{fill:none;stroke:var(--lean);stroke-width:1.6;stroke-dasharray:6 4;opacity:0}
+  .link circle{fill:var(--lean);opacity:0}
+  .gap-on:not(.fixed) .link path{opacity:.95;animation:dash 1.2s linear infinite}
+  .gap-on:not(.fixed) .link circle{opacity:1}
+  @keyframes dash{to{stroke-dashoffset:-20}}
+
+  /* lean infoview inside lean editor */
+  .lean-ed{display:grid;grid-template-rows:35px 22px 1fr 190px}
+  .infoview{border-top:1px solid #1b1b1b;background:#1a1a1a;font:12px/1.6 var(--mono);color:#ccc;padding:8px 14px;overflow:hidden}
+  .infoview .ih{font:11px var(--ui);color:#999;letter-spacing:.06em;margin-bottom:6px;display:flex;justify-content:space-between}
+  .infoview .blk{opacity:0;transition:opacity .4s;position:absolute}
+  .infoview{position:relative}
+  .infoview .blk.on{opacity:1;position:static}
+  .infoview .goal{color:#ccc} .infoview .ok{color:var(--ok)} .infoview .bad{color:var(--gap)} .infoview .sub{color:#999}
+  .infoview .kv{display:grid;grid-template-columns:110px 1fr;gap:2px 10px;margin:4px 0}
+
+  /* panel */
+  .panel{border-top:1px solid #1b1b1b;background:var(--bg);display:grid;grid-template-rows:35px 1fr;min-height:0}
+  .ptabs{display:flex;gap:22px;padding:0 18px;align-items:center;font-size:11.5px;color:#999;letter-spacing:.04em;border-bottom:1px solid #1b1b1b}
+  .ptabs span{position:relative;padding:8px 0}
+  .ptabs span.on{color:#fff}
+  .ptabs span.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:#fff}
+  .ptabs .cnt{background:#4d4d4d;color:#fff;border-radius:8px;padding:0 6px;margin-left:6px;font-size:10.5px}
+  .pbody{position:relative;overflow:hidden}
+  .term,.problems{position:absolute;inset:0;padding:8px 18px;font:12.5px/1.7 var(--mono);transition:opacity .3s;overflow:auto;scrollbar-width:none}
+  .term::-webkit-scrollbar{display:none}
+  .problems{font-family:var(--ui);opacity:0;pointer-events:none}
+  .stage.probs .term{opacity:0}.stage.probs .problems{opacity:1}
+  .term .ln2{white-space:pre;color:#ccc;min-height:21px}
+  .term .p{color:#7ee787}.term .d{color:#8b949e}.term .h{color:#fff;font-weight:500}.term .r{color:var(--redund)}.term .g{color:var(--gap)}.term .k{color:var(--ok)}.term .a{color:#58a6ff}
+  .term .spin{display:inline-block;width:9px;color:#8b949e}
+  .problems .row{display:grid;grid-template-columns:18px 1fr auto;gap:10px;align-items:baseline;padding:3px 0;color:#ccc;font-size:12.5px}
+  .problems .row .loc{font:11.5px var(--mono);color:#999}
+  .problems .row i{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .problems .row i.r{background:var(--redund)}.problems .row i.g{background:var(--gap)}.problems .row i.k{background:var(--ok)}
+  .problems .row.gone{opacity:.35;text-decoration:line-through}
+  .problems .grp{color:#999;font-size:11.5px;padding:2px 0 4px}
+  .problems .grp b{color:#ddd;font-weight:500}
+
+  /* status bar */
+  .status{display:flex;align-items:center;gap:0;background:#007acc;color:#fff;font-size:11.5px;padding:0 10px 0 0}
+  .status .it{padding:0 9px;display:flex;align-items:center;gap:6px;height:22px}
+  .status .it.rm{background:#16825d;padding:0 10px}
+  .status .it.sce{margin-left:auto}
+  .status .it.sce .bar{width:90px;height:3px;background:rgba(255,255,255,.25);border-radius:2px;overflow:hidden}
+  .status .it.sce .bar i{display:block;height:100%;width:0;background:#fff;transition:width 2.4s linear}
+  .stage.s1 .status .it.sce .bar i{width:100%}
+  .status .gas{font-variant-numeric:tabular-nums}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <div>solidity-check-envelope · demo storyboard v2 · <span id="tick">00.0s</span></div>
+  <div class="steps">
+    <button data-step="0">0 idle</button>
+    <button data-step="1">1 run</button>
+    <button data-step="2">2 redundant</button>
+    <button data-step="3">3 lean spec</button>
+    <button data-step="4">4 gap</button>
+    <button data-step="5">5 fix</button>
+    <button data-step="replay">↻ replay</button>
+  </div>
+</div>
+
+<div class="stage-wrap"><div class="stage" id="stage">
+  <div class="titlebar">
+    <span class="dots"><i></i><i></i><i></i></span>
+    <span class="menu"><span>File</span><span>Edit</span><span>Selection</span><span>View</span><span>Go</span><span>Run</span><span>Terminal</span><span>Help</span></span>
+    <span class="center"><b>RangeGuardHook.sol</b> — range-guard-hook</span>
+  </div>
+
+  <div class="frame">
+    <div class="activity">
+      <i class="on"><svg viewBox="0 0 24 24"><path d="M4 4h7l2 2h7v13H4z"/></svg></i>
+      <i><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></svg></i>
+      <i><svg viewBox="0 0 24 24"><path d="M6 3v18M6 9c6 0 6 6 12 6M18 3v6"/><circle cx="6" cy="3" r="1.5"/><circle cx="18" cy="3" r="1.5"/><circle cx="6" cy="21" r="1.5"/></svg></i>
+      <i><svg viewBox="0 0 24 24"><path d="M8 4l-5 8 5 8M16 4l5 8-5 8"/></svg><span class="cnt">4</span></i>
+      <i><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg></i>
+      <i style="margin-top:auto;margin-bottom:8px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></i>
+    </div>
+
+    <div class="explorer">
+      <div class="hd">EXPLORER</div>
+      <div class="proj">▾ RANGE-GUARD-HOOK</div>
+      <div class="row dir" style="padding-left:16px">▾ lib</div>
+      <div class="row" style="padding-left:32px">▸ v4-core</div>
+      <div class="row" style="padding-left:32px">▸ v4-periphery</div>
+      <div class="row" style="padding-left:32px">▸ solady</div>
+      <div class="row dir" style="padding-left:16px">▾ spec</div>
+      <div class="row" style="padding-left:32px"><span class="ic lean">L∀</span>Invariants.lean</div>
+      <div class="row" style="padding-left:32px"><span class="ic lean">L∀</span>Model.lean</div>
+      <div class="row" style="padding-left:32px"><span class="ic toml">{}</span>lakefile.toml</div>
+      <div class="row dir" style="padding-left:16px">▾ src</div>
+      <div class="row sel" style="padding-left:32px"><span class="ic sol">S</span>RangeGuardHook.sol<span class="b r">3</span><span class="b g">1</span></div>
+      <div class="row dir" style="padding-left:16px">▾ test</div>
+      <div class="row" style="padding-left:32px"><span class="ic sol">S</span>RangeGuardHook.t.sol</div>
+      <div class="row" style="padding-left:16px"><span class="ic toml">{}</span>foundry.toml</div>
+      <div class="row" style="padding-left:16px"><span class="ic json">{}</span>sce.config.json</div>
+      <div class="row" style="padding-left:16px"><span class="ic md">M</span>README.md</div>
+      <div class="outline">OUTLINE</div>
+    </div>
+
+    <div class="work">
+      <div class="editors">
+        <!-- Solidity -->
+        <div class="ed" id="sol">
+          <div class="tabs">
+            <div class="tab on"><span class="ic sol" style="width:14px;height:14px;font-size:8px">S</span>RangeGuardHook.sol<span class="x">×</span></div>
+            <div class="tab"><span class="ic sol" style="width:14px;height:14px;font-size:8px">S</span>BaseHook.sol<span class="x">×</span></div>
+            <div class="tab"><span class="ic sol" style="width:14px;height:14px;font-size:8px">S</span>RangeGuardHook.t.sol</div>
+          </div>
+          <div class="crumbs"><span>src</span><span>RangeGuardHook.sol</span><span>RangeGuardHook</span><span id="crumb">_beforeAddLiquidity</span></div>
+          <div class="codewrap">
+<pre id="solpre">
+<div class="ln"><i>1</i><u></u><code><span class="c">// SPDX-License-Identifier: MIT</span></code></div>
+<div class="ln"><i>2</i><u></u><code><span class="k">pragma</span> <span class="v">solidity</span> <span class="op">^</span><span class="n">0.8.26</span>;</code></div>
+<div class="ln"><i>3</i><u></u><code></code></div>
+<div class="ln"><i>4</i><u></u><code><span class="k">import</span> {<span class="t">BaseHook</span>} <span class="k">from</span> <span class="s">"v4-periphery/src/utils/BaseHook.sol"</span>;</code></div>
+<div class="ln"><i>5</i><u></u><code><span class="k">import</span> {<span class="t">Hooks</span>} <span class="k">from</span> <span class="s">"v4-core/src/libraries/Hooks.sol"</span>;</code></div>
+<div class="ln"><i>6</i><u></u><code><span class="k">import</span> {<span class="t">IPoolManager</span>} <span class="k">from</span> <span class="s">"v4-core/src/interfaces/IPoolManager.sol"</span>;</code></div>
+<div class="ln"><i>7</i><u></u><code><span class="k">import</span> {<span class="t">PoolKey</span>} <span class="k">from</span> <span class="s">"v4-core/src/types/PoolKey.sol"</span>;</code></div>
+<div class="ln"><i>8</i><u></u><code><span class="k">import</span> {<span class="t">PoolId</span>, <span class="t">PoolIdLibrary</span>} <span class="k">from</span> <span class="s">"v4-core/src/types/PoolId.sol"</span>;</code></div>
+<div class="ln"><i>9</i><u></u><code><span class="k">import</span> {<span class="t">ModifyLiquidityParams</span>} <span class="k">from</span> <span class="s">"v4-core/src/types/PoolOperation.sol"</span>;</code></div>
+<div class="ln"><i>10</i><u></u><code><span class="k">import</span> {<span class="t">Ownable</span>} <span class="k">from</span> <span class="s">"solady/auth/Ownable.sol"</span>;</code></div>
+<div class="ln"><i>11</i><u></u><code></code></div>
+<div class="ln"><i>12</i><u></u><code><span class="c">/// @title  RangeGuardHook</span></code></div>
+<div class="ln"><i>13</i><u></u><code><span class="c">/// @notice Caps the liquidity a single pool may route through this hook.</span></code></div>
+<div class="ln"><i>14</i><u>⌄</u><code><span class="ct">contract</span> <span class="t">RangeGuardHook</span> <span class="ct">is</span> <span class="t">BaseHook</span>, <span class="t">Ownable</span> {</code></div>
+<div class="ln"><i>15</i><u></u><code>    <span class="k">using</span> <span class="t">PoolIdLibrary</span> <span class="k">for</span> <span class="t">PoolKey</span>;</code></div>
+<div class="ln"><i>16</i><u></u><code></code></div>
+<div class="ln"><i>17</i><u></u><code>    <span class="ct">mapping</span>(<span class="t">PoolId</span> <span class="op">=></span> <span class="t">uint128</span>) <span class="ct">public</span> <span class="v">liquidityCap</span>;</code></div>
+<div class="ln"><i>18</i><u></u><code>    <span class="ct">mapping</span>(<span class="t">PoolId</span> <span class="op">=></span> <span class="t">uint128</span>) <span class="ct">public</span> <span class="v">liquidityUsed</span>;</code></div>
+<div class="ln"><i>19</i><u></u><code></code></div>
+<div class="ln"><i>20</i><u></u><code>    <span class="ct">event</span> <span class="f">CapUpdated</span>(<span class="t">PoolId</span> <span class="ct">indexed</span> <span class="v">id</span>, <span class="t">uint128</span> <span class="v">cap</span>);</code></div>
+<div class="ln"><i>21</i><u></u><code></code></div>
+<div class="ln"><i>22</i><u>⌄</u><code>    <span class="ct">constructor</span>(<span class="t">IPoolManager</span> <span class="v">_pm</span>, <span class="t">address</span> <span class="v">_owner</span>) <span class="f">BaseHook</span>(<span class="v">_pm</span>) {</code></div>
+<div class="ln" id="L23"><i>23</i><u></u><code>        <span class="f">require</span>(<span class="t">address</span>(<span class="v">_pm</span>) <span class="op">!=</span> <span class="t">address</span>(<span class="n">0</span>), <span class="s">"pm required"</span>);</code></div>
+<div class="ln"><i>24</i><u></u><code>        <span class="f">_initializeOwner</span>(<span class="v">_owner</span>);</code></div>
+<div class="ln"><i>25</i><u></u><code>    }</code></div>
+<div class="ln"><i>26</i><u></u><code></code></div>
+<div class="ln"><i>27</i><u>›</u><code>    <span class="ct">function</span> <span class="f">getHookPermissions</span>() <span class="ct">public</span> <span class="ct">pure</span> <span class="ct">override</span> <span class="ct">returns</span> (<span class="t">Hooks</span>.<span class="t">Permissions</span> <span class="ct">memory</span>) {<span style="background:#3a3a3a;color:#ccc;border-radius:3px;padding:0 6px;margin-left:6px;font-size:11px"> ⋯ </span></code></div>
+<div class="ln"><i>42</i><u></u><code>    }</code></div>
+<div class="ln"><i>43</i><u></u><code></code></div>
+<div class="ln"><i>44</i><u>⌄</u><code>    <span class="ct">function</span> <span class="f">_beforeAddLiquidity</span>(<span class="t">address</span>, <span class="t">PoolKey</span> <span class="ct">calldata</span> <span class="v">key</span>,</code></div>
+<div class="ln"><i>45</i><u></u><code>        <span class="t">ModifyLiquidityParams</span> <span class="ct">calldata</span> <span class="v">p</span>, <span class="t">bytes</span> <span class="ct">calldata</span>)</code></div>
+<div class="ln"><i>46</i><u></u><code>        <span class="ct">internal</span> <span class="ct">override</span> <span class="f">onlyPoolManager</span> <span class="ct">returns</span> (<span class="t">bytes4</span>)</code></div>
+<div class="ln"><i>47</i><u></u><code>    {</code></div>
+<div class="ln r-line" id="R1"><i>48</i><u></u><code><span class="sk">        <span class="f">require</span>(<span class="t">address</span>(<span class="v">poolManager</span>) <span class="op">!=</span> <span class="t">address</span>(<span class="n">0</span>), <span class="s">"pm unset"</span>);</span><span class="hint">redundant · immutable, non-zero since constructor L23</span></code></div>
+<div class="ln r-line" id="R2"><i>49</i><u></u><code><span class="sk">        <span class="f">require</span>(<span class="v">msg</span>.<span class="v">sender</span> <span class="op">==</span> <span class="t">address</span>(<span class="v">poolManager</span>), <span class="s">"not pool manager"</span>);</span><span class="hint">redundant · same as modifier onlyPoolManager</span></code></div>
+<div class="ln"><i>50</i><u></u><code>        <span class="f">require</span>(<span class="v">p</span>.<span class="v">liquidityDelta</span> <span class="op">></span> <span class="n">0</span>, <span class="s">"delta must be positive"</span>);</code></div>
+<div class="ln"><i>51</i><u></u><code>        <span class="t">PoolId</span> <span class="v">id</span> <span class="op">=</span> <span class="v">key</span>.<span class="f">toId</span>();</code></div>
+<div class="ln"><i>52</i><u></u><code>        <span class="t">uint128</span> <span class="v">delta</span> <span class="op">=</span> <span class="t">uint128</span>(<span class="t">uint256</span>(<span class="v">p</span>.<span class="v">liquidityDelta</span>));</code></div>
+<div class="ln"><i>53</i><u></u><code>        <span class="f">require</span>(<span class="v">liquidityUsed</span>[<span class="v">id</span>] <span class="op">+</span> <span class="v">delta</span> <span class="op"><=</span> <span class="v">liquidityCap</span>[<span class="v">id</span>], <span class="s">"cap exceeded"</span>);</code></div>
+<div class="ln r-line" id="R3"><i>54</i><u></u><code><span class="sk">        <span class="f">require</span>(<span class="v">liquidityCap</span>[<span class="v">id</span>] <span class="op">></span> <span class="n">0</span>, <span class="s">"pool not registered"</span>);</span><span class="hint">redundant · implied by L50 ∧ L53</span></code></div>
+<div class="ln"><i>55</i><u></u><code>        <span class="v">liquidityUsed</span>[<span class="v">id</span>] <span class="op">+=</span> <span class="v">delta</span>;</code></div>
+<div class="ln"><i>56</i><u></u><code>        <span class="k">return</span> <span class="t">BaseHook</span>.<span class="v">beforeAddLiquidity</span>.<span class="v">selector</span>;</code></div>
+<div class="ln"><i>57</i><u></u><code>    }</code></div>
+<div class="ln"><i>58</i><u></u><code></code></div>
+<div class="ln"><i>59</i><u>⌄</u><code>    <span class="ct">function</span> <span class="f">_beforeRemoveLiquidity</span>(<span class="t">address</span>, <span class="t">PoolKey</span> <span class="ct">calldata</span> <span class="v">key</span>,</code></div>
+<div class="ln"><i>60</i><u></u><code>        <span class="t">ModifyLiquidityParams</span> <span class="ct">calldata</span> <span class="v">p</span>, <span class="t">bytes</span> <span class="ct">calldata</span>)</code></div>
+<div class="ln"><i>61</i><u></u><code>        <span class="ct">internal</span> <span class="ct">override</span> <span class="f">onlyPoolManager</span> <span class="ct">returns</span> (<span class="t">bytes4</span>)</code></div>
+<div class="ln"><i>62</i><u></u><code>    {</code></div>
+<div class="ln"><i>63</i><u></u><code>        <span class="t">PoolId</span> <span class="v">id</span> <span class="op">=</span> <span class="v">key</span>.<span class="f">toId</span>();</code></div>
+<div class="ln"><i>64</i><u></u><code>        <span class="t">uint128</span> <span class="v">delta</span> <span class="op">=</span> <span class="t">uint128</span>(<span class="t">uint256</span>(<span class="op">-</span><span class="v">p</span>.<span class="v">liquidityDelta</span>));</code></div>
+<div class="ln"><i>65</i><u></u><code>        <span class="v">liquidityUsed</span>[<span class="v">id</span>] <span class="op">-=</span> <span class="v">delta</span>;</code></div>
+<div class="ln"><i>66</i><u></u><code>        <span class="k">return</span> <span class="t">BaseHook</span>.<span class="v">beforeRemoveLiquidity</span>.<span class="v">selector</span>;</code></div>
+<div class="ln"><i>67</i><u></u><code>    }</code></div>
+<div class="ln"><i>68</i><u></u><code></code></div>
+<div class="ln g-line" id="G1"><i>69</i><u>⌄</u><code>    <span class="ct">function</span> <span class="sq"><span class="f">setLiquidityCap</span>(<span class="t">PoolId</span> <span class="v">id</span>, <span class="t">uint128</span> <span class="v">newCap</span>)</span> <span class="ct">external</span> <span class="f">onlyOwner</span> {<span class="hint gap">gap · violates used_le_cap</span></code>
+  <div class="lens" id="lens"><b>sce</b> · 1 gap · counterexample length 2<span class="act">Apply synthesized check</span><span class="act">Show trace</span></div>
+  <div class="peek">
+    <div class="hd"><b>used_le_cap can be violated</b><span>spec/Invariants.lean:8 · counterexample found at fixed-point iteration 4</span></div>
+    <div>Every reachable state must satisfy <span class="src">∀ id, liquidityUsed id ≤ liquidityCap id</span>. The following externally callable sequence breaks it:</div>
+    <div class="trace">
+      <span class="st">used = cap</span>1&nbsp; <b>poolManager</b> → <b>_beforeAddLiquidity</b>(id, δ = cap[id])<br>
+      <span class="st"><em>used = cap + 1 &gt; cap</em></span>2&nbsp; <b>owner</b> → <b>setLiquidityCap</b>(id, cap[id] − 1)
+    </div>
+    <div class="fix">Least restrictive guard that closes the gap: <code>require(newCap &gt;= liquidityUsed[id], "cap below usage");</code></div>
+    <span class="btn">Apply fix</span><span class="btn sec">Add to Lean counterexamples</span>
+  </div>
+</div>
+<div class="ln fix-line ok-line" id="FIX"><i>70</i><u></u><code>        <span class="typed" id="typed"></span><span class="hint ok">added by sce · used_le_cap holds (cert L70)</span></code></div>
+<div class="ln" id="L70"><i>70</i><u></u><code>        <span class="f">require</span>(<span class="v">newCap</span> <span class="op">></span> <span class="n">0</span>, <span class="s">"cap must be positive"</span>);</code></div>
+<div class="ln"><i>71</i><u></u><code>        <span class="v">liquidityCap</span>[<span class="v">id</span>] <span class="op">=</span> <span class="v">newCap</span>;</code></div>
+<div class="ln"><i>72</i><u></u><code>        <span class="k">emit</span> <span class="f">CapUpdated</span>(<span class="v">id</span>, <span class="v">newCap</span>);</code></div>
+<div class="ln"><i>73</i><u></u><code>    }</code></div>
+<div class="ln"><i>74</i><u></u><code>}</code></div>
+</pre>
+            <div class="minimap" id="mm"><div class="vp" id="vp" style="top:8px"></div></div>
+          </div>
+        </div>
+
+        <!-- Lean -->
+        <div class="ed lean-ed" id="leanEd">
+          <div class="tabs"><div class="tab on"><span class="ic lean" style="width:14px;height:14px;font-size:8px">L∀</span>Invariants.lean<span class="x">×</span></div><div class="tab"><span class="ic lean" style="width:14px;height:14px;font-size:8px">L∀</span>Model.lean</div></div>
+          <div class="crumbs"><span>spec</span><span>Invariants.lean</span><span>RangeGuardHook</span></div>
+<pre style="padding-bottom:10px">
+<div class="ln"><i>1</i><u></u><code><span class="k">import</span> Sce.Solidity</code></div>
+<div class="ln"><i>2</i><u></u><code><span class="k">import</span> Sce.Tactics</code></div>
+<div class="ln"><i>3</i><u></u><code></code></div>
+<div class="ln"><i>4</i><u></u><code><span class="k">namespace</span> <span class="t">RangeGuardHook</span></code></div>
+<div class="ln"><i>5</i><u></u><code><span class="k">open</span> Sce</code></div>
+<div class="ln"><i>6</i><u></u><code></code></div>
+<div class="ln"><i>7</i><u></u><code><span class="c">/-- Liquidity in use never exceeds the configured cap. -/</span></code></div>
+<div class="ln l-line" id="LI"><i>8</i><u></u><code><span class="k">def</span> <span class="f">used_le_cap</span> (s : <span class="t">State</span>) : <span class="t">Prop</span> :=<span class="hint lean" id="leanHint">violated · counterexample from RangeGuardHook.sol:69</span></code></div>
+<div class="ln l-line"><i>9</i><u></u><code>  ∀ id, s.liquidityUsed id ≤ s.liquidityCap id</code></div>
+<div class="ln"><i>10</i><u></u><code></code></div>
+<div class="ln"><i>11</i><u></u><code><span class="c">/-- Once a pool holds liquidity, its cap is positive. -/</span></code></div>
+<div class="ln"><i>12</i><u></u><code><span class="k">def</span> <span class="f">cap_pos_of_used</span> (s : <span class="t">State</span>) : <span class="t">Prop</span> :=</code></div>
+<div class="ln"><i>13</i><u></u><code>  ∀ id, 0 &lt; s.liquidityUsed id → 0 &lt; s.liquidityCap id</code></div>
+<div class="ln"><i>14</i><u></u><code></code></div>
+<div class="ln"><i>15</i><u></u><code><span class="k">theorem</span> <span class="f">envelope</span> :</code></div>
+<div class="ln"><i>16</i><u></u><code>    <span class="t">Invariant</span> used_le_cap ∧ <span class="t">Invariant</span> cap_pos_of_used := <span class="k">by</span></code></div>
+<div class="ln cur"><i>17</i><u></u><code>  sce_check<span class="caret"></span></code></div>
+<div class="ln"><i>18</i><u></u><code></code></div>
+<div class="ln"><i>19</i><u></u><code><span class="k">end</span> <span class="t">RangeGuardHook</span></code></div>
+</pre>
+          <div class="infoview">
+            <div class="ih"><span>LEAN INFOVIEW · Invariants.lean:17:2</span><span>sce 0.1.0</span></div>
+            <div class="blk on" id="iv0"><div class="goal">⊢ Invariant used_le_cap ∧ Invariant cap_pos_of_used</div><div class="sub">waiting for sce certificate…</div></div>
+            <div class="blk" id="iv1">
+              <div class="ok">✓ cap_pos_of_used</div><div class="sub">  certificate .sce/cert/L54.lean · derived from L50 ∧ L53</div>
+              <div class="bad" style="margin-top:6px">✗ used_le_cap</div>
+              <div class="kv sub"><span>counterexample</span><span>_beforeAddLiquidity(id, cap) ; setLiquidityCap(id, cap − 1)</span><span>violating state</span><span>liquidityUsed id = cap, liquidityCap id = cap − 1</span><span>fix</span><span class="goal">require newCap ≥ liquidityUsed[id]</span></div>
+            </div>
+            <div class="blk" id="iv2"><div class="ok">✓ used_le_cap</div><div class="sub">  certificate .sce/cert/L70.lean · 6 iterations, 41 abstract states</div><div class="ok">✓ cap_pos_of_used</div><div class="sub">  certificate .sce/cert/L54.lean</div><div class="goal" style="margin-top:8px">No goals</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bottom panel -->
+      <div class="panel">
+        <div class="ptabs"><span id="tProb">PROBLEMS<span class="cnt" id="pcnt">0</span></span><span>OUTPUT</span><span>DEBUG CONSOLE</span><span class="on" id="tTerm">TERMINAL</span><span>PORTS</span></div>
+        <div class="pbody">
+          <div class="term" id="term"><div class="ln2"><span class="p">➜</span> <span class="a">range-guard-hook</span> <span class="d">git:(</span><span class="g" style="color:#f78166">main</span><span class="d">)</span> <span id="cmd"></span><span class="caret" id="tcaret"></span></div></div>
+          <div class="problems" id="problems">
+            <div class="grp"><b>RangeGuardHook.sol</b> src · 4</div>
+            <div class="row" id="p1"><i class="r"></i><span>redundant check: poolManager is immutable and non-zero by constructor L23</span><span class="loc">[48, 9]</span></div>
+            <div class="row" id="p2"><i class="r"></i><span>redundant check: identical to modifier onlyPoolManager (ImmutableState.sol:22)</span><span class="loc">[49, 9]</span></div>
+            <div class="row" id="p3"><i class="r"></i><span>redundant check: implied by L50 ∧ L53 on every reachable path</span><span class="loc">[54, 9]</span></div>
+            <div class="row" id="p4"><i class="g"></i><span>gap: used_le_cap violated by call sequence of length 2 — fix available</span><span class="loc">[69, 14]</span></div>
+            <div class="row" id="p5" style="display:none"><i class="k"></i><span>fixed: used_le_cap holds — certificate .sce/cert/L70.lean</span><span class="loc">[70, 9]</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status">
+    <span class="it rm">⌥</span>
+    <span class="it">⑂ main</span>
+    <span class="it" id="stErr">⊗ 0 &nbsp;⚠ 0</span>
+    <span class="it sce"><span>◆ sce</span><span class="bar"><i></i></span><span id="stMsg">idle</span><span class="gas" id="gas"></span></span>
+    <span class="it">Ln 17, Col 12</span><span class="it">Spaces: 4</span><span class="it">UTF-8</span><span class="it">LF</span><span class="it" id="stLang">Solidity</span>
+  </div>
+
+  <svg class="link" id="link" width="1600" height="1000" viewBox="0 0 1600 1000"><path id="lp" d=""/><circle id="c1" r="3.5"/><circle id="c2" r="3.5"/></svg>
+</div></div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const stage = $('#stage'), solpre = $('#solpre'), term = $('#term'), cmd = $('#cmd'), typed = $('#typed');
+  const rec = new URLSearchParams(location.search).has('rec');
+  if (rec) document.body.classList.add('rec');
+
+  // scale stage to wrapper
+  function fit(){ const w = $('.stage-wrap').getBoundingClientRect().width; stage.style.transform = `scale(${w/1600})`; }
+  addEventListener('resize', fit); fit();
+
+  // minimap dots
+  const mm = $('#mm'); for (let i=0;i<74;i++){ const d=document.createElement('i'); d.style.width=(20+Math.random()*50)+'%'; d.style.opacity=.5+Math.random()*.5; mm.appendChild(d);} 
+  mm.appendChild($('#vp'));
+
+  let timers = []; const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+  const clear = () => { timers.forEach(clearTimeout); timers = []; };
+  const sleep = ms => new Promise(r => later(r, ms));
+
+  async function typeInto(el, text, cps=38){ el.textContent=''; for (const ch of text){ el.textContent += ch; await sleep(1000/cps + (Math.random()*30)); } }
+  function tline(html){ const d=document.createElement('div'); d.className='ln2'; d.innerHTML=html; term.appendChild(d); term.scrollTop=1e9; return d; }
+  function setMsg(t){ $('#stMsg').textContent = t; }
+  function scrollTo(lineId, offset=140){ const el=$('#'+lineId); solpre.scrollTop = el.offsetTop - offset; $('#vp').style.top = (8 + (el.offsetTop/solpre.scrollHeight)*(solpre.clientHeight-140))+'px'; }
+  function countGas(to){ const el=$('#gas'); let v=0; const step=()=>{ v=Math.min(to, v+37); el.textContent=' −'+v.toLocaleString()+' gas'; if(v<to) timers.push(setTimeout(step,16)); }; step(); }
+  function drawLink(){
+    const a=$('#LI'), b=$('#G1'), ed=$('#sol'); const sr=stage.getBoundingClientRect(), sc=sr.width/1600;
+    const ar=a.getBoundingClientRect(), br=b.getBoundingClientRect(), er=ed.getBoundingClientRect();
+    const ax=(ar.left-sr.left)/sc+1, ay=(ar.top-sr.top)/sc+10;
+    const bx=(er.right-sr.left)/sc-88, by=(br.top-sr.top)/sc+10;
+    const kx=bx-2;
+    $('#lp').setAttribute('d',`M${ax},${ay} C${kx-10},${ay} ${kx},${ay} ${kx},${ay+40} L${kx},${by-40} C${kx},${by} ${kx},${by} ${bx-6},${by}`);
+    $('#c1').setAttribute('cx',ax);$('#c1').setAttribute('cy',ay);$('#c2').setAttribute('cx',bx-6);$('#c2').setAttribute('cy',by);
+  }
+  function renumber(d){ let after=false; document.querySelectorAll('#solpre .ln').forEach(l=>{ if(after){ const i=l.querySelector('i'); i.textContent=(+i.textContent)+d; } if(l.id==='FIX') after=true; }); }
+  function setStep(n){ document.querySelectorAll('.controls button').forEach(b=>b.setAttribute('aria-current', b.dataset.step==n?'step':'')); }
+  let renumbered=false;
+  function resetDom(){ if(renumbered){ renumber(-1); } renumbered=false;
+    stage.className='stage'; term.innerHTML=''; term.appendChild(document.createElement('div')); term.firstChild.className='ln2';
+    term.firstChild.innerHTML='<span class="p">➜</span> <span class="a">range-guard-hook</span> <span class="d">git:(</span><span style="color:#f78166">main</span><span class="d">)</span> <span id="cmd2"></span><span class="caret"></span>';
+    document.querySelectorAll('.r-line').forEach(e=>e.classList.remove('lit'));
+    ['iv0','iv1','iv2'].forEach((id,i)=>$('#'+id).classList.toggle('on',i===0));
+    $('#gas').textContent=''; setMsg('idle'); $('#stErr').innerHTML='⊗ 0 &nbsp;⚠ 0'; $('#pcnt').textContent='0';
+    $('#p4').classList.remove('gone'); $('#lens').innerHTML='<b>sce</b> · 1 gap · counterexample length 2<span class="act">Apply synthesized check</span><span class="act">Show trace</span>'; $('#p5').style.display='none'; typed.textContent=''; $('#leanHint').textContent='violated · counterexample from RangeGuardHook.sol:69';
+    $('#tTerm').classList.add('on'); $('#tProb').classList.remove('on'); solpre.scrollTop=0; $('#vp').style.top='8px'; $('#crumb').textContent='RangeGuardHook';
+  }
+
+  // ---- stages ----
+  const S = {};
+  S[0] = async () => { resetDom(); };
+  S[1] = async () => {
+    S[0](); stage.classList.add('s1'); setMsg('analyzing…');
+    await typeInto($('#cmd2'), 'sce analyze --spec spec/ --lsp');
+    await sleep(350); term.querySelector('.caret').remove();
+    tline('<span class="d">sce 0.1.0 · solidity-check-envelope</span>');
+    await sleep(260); tline('<span class="a">→</span> reading <span class="h">2</span> contracts, <span class="h">7</span> checks, <span class="h">4</span> external entry points');
+    await sleep(420); tline('<span class="a">→</span> building pushdown system <span class="d">(re-entrancy aware)</span> … <span class="h">41</span> abstract states, <span class="h">12</span> predicates');
+    await sleep(520); tline('<span class="a">→</span> computing envelope C<sub>max</sub> … fixed point after <span class="h">6</span> iterations <span class="d">(1.8s)</span>');
+    await sleep(380); tline('<span class="a">→</span> diffing implementation checks against envelope');
+    await sleep(300);
+  };
+  S[2] = async () => {
+    await S[1](); stage.classList.add('on','s2'); setMsg('3 redundant');
+    scrollTo('R1', 220); $('#crumb').textContent='_beforeAddLiquidity';
+    tline('<span class="r">●</span> redundant <span class="h">3</span> <span class="d">— no spec required (reachability only)</span>');
+    await sleep(450); $('#R1').classList.add('lit'); tline('<span class="d">  src/RangeGuardHook.sol:48</span>  require(address(poolManager) != address(0))   <span class="d">← constructor L23</span>');
+    await sleep(650); $('#R2').classList.add('lit'); tline('<span class="d">  src/RangeGuardHook.sol:49</span>  require(msg.sender == address(poolManager))    <span class="d">← modifier onlyPoolManager</span>');
+    await sleep(650); $('#R3').classList.add('lit'); tline('<span class="d">  src/RangeGuardHook.sol:54</span>  require(liquidityCap[id] > 0)                  <span class="d">← L50 ∧ L53</span>');
+    await sleep(300); countGas(3320); $('#pcnt').textContent='3'; $('#stErr').innerHTML='⊗ 0 &nbsp;⚠ 3';
+    tline('<span class="k">✓</span> removing all three saves <span class="h">≈3,320 gas</span> per addLiquidity <span class="d">(hints written to .sce/yul/)</span>');
+  };
+  S[3] = async () => {
+    await S[2](); await sleep(600);
+    tline('<span class="a">→</span> loading Lean spec <span class="h">spec/Invariants.lean</span> … <span class="h">2</span> invariants, <span class="h">1</span> theorem');
+    stage.classList.add('lean','s3'); setMsg('checking 2 invariants'); $('#stLang').textContent='Solidity · Lean 4';
+    await sleep(900);
+    tline('<span class="k">✓</span> cap_pos_of_used <span class="d">— holds, certificate .sce/cert/L54.lean</span>');
+  };
+  S[4] = async () => {
+    await S[3](); await sleep(500);
+    tline('<span class="g">✗</span> used_le_cap <span class="d">— violated, counterexample of length 2</span>');
+    scrollTo('G1', 250); $('#crumb').textContent='setLiquidityCap';
+    await sleep(700); stage.classList.add('gap-on','s4'); setMsg('1 gap · fix available'); $('#pcnt').textContent='4'; $('#stErr').innerHTML='⊗ 1 &nbsp;⚠ 3';
+    $('#iv0').classList.remove('on'); $('#iv1').classList.add('on');
+    await sleep(350); drawLink();
+    tline('<span class="d">  1</span> poolManager → _beforeAddLiquidity(id, δ = cap[id])');
+    tline('<span class="d">  2</span> owner → setLiquidityCap(id, cap[id] − 1)          <span class="g">used > cap</span>');
+    tline('<span class="a">→</span> synthesized least-restrictive guard: <span class="h">require(newCap >= liquidityUsed[id])</span>');
+  };
+  S[5] = async () => {
+    await S[4](); await sleep(2600);
+    stage.classList.add('fixed','s5'); renumber(1); renumbered=true; $('#leanHint').textContent='holds · certificate .sce/cert/L70.lean';
+    await sleep(350);
+    await typeInto(typed, 'require(newCap >= liquidityUsed[id], "cap below usage");', 60);
+    stage.classList.add('typed-done'); typed.innerHTML = '<span class="f">require</span>(<span class="v">newCap</span> <span class="op">>=</span> <span class="v">liquidityUsed</span>[<span class="v">id</span>], <span class="s">"cap below usage"</span>);';
+    await sleep(500); setMsg('re-checking…'); stage.classList.add('s1');
+    await sleep(1400); stage.classList.remove('s1'); setMsg('all invariants hold');
+    $('#iv1').classList.remove('on'); $('#iv2').classList.add('on'); $('#lens').innerHTML='<b>sce</b> · used_le_cap holds · certificate L70<span class="act">Show proof</span>';
+    $('#stErr').innerHTML='⊗ 0 &nbsp;⚠ 3'; $('#pcnt').textContent='4'; $('#p4').classList.add('gone'); $('#p5').style.display='';
+    tline('<span class="k">✓</span> used_le_cap <span class="d">— holds after fix, certificate .sce/cert/L70.lean · </span><span class="h">lake build</span><span class="d"> re-verifies in 0.4s</span>');
+    await sleep(900); $('#tTerm').classList.remove('on'); $('#tProb').classList.add('on'); stage.classList.add('probs');
+  };
+
+  async function go(n){ clear(); setStep(n); await S[n](); }
+  async function replay(){ clear(); await go(0); await sleep(900); setStep(5); await S[5](); }
+  document.querySelectorAll('.controls button').forEach(b=>b.addEventListener('click',()=> b.dataset.step==='replay'?replay():go(+b.dataset.step)));
+  addEventListener('keydown',e=>{ if(e.key==='r') replay(); if(/^[0-5]$/.test(e.key)) go(+e.key); });
+
+  // timer display
+  const t0=performance.now(); setInterval(()=>{ $('#tick').textContent=((performance.now()-t0)/1000).toFixed(1)+'s'; },100);
+  replay();
+})();
+</script>
+</body>
+</html>
