@@ -105,5 +105,22 @@ yourself in-conversation.
 - Stacking flat info blocks (facts row + chips + grid) with no single focal
   point — pick a hero; a left context-card + right timeline beats a 2-up grid.
 - A color legend the diagram could encode via arrows/position/edge-labels.
+- An encoding (filled vs. hollow, solid vs. dashed, thick vs. thin) whose
+  meaning lives only in the speaker notes — the viewer sees undifferentiated
+  shapes. Put a one-line key above the figure **and** a word under each mark.
+- The same closing line shape on every slide — 「〜のは、〜だからです」
+  「違うのは、〜かどうかです」「ここが〜です」. Reads fine slide by slide;
+  reads as generated when the deck is scrolled. **Pull every closing line into
+  one column and read them together**; if the same syntax runs three slides,
+  rewrite them as single 常体 statements. Mixing 敬体/常体 across the same
+  role (all closing lines, all captions) is the same defect.
+- A table header written as a clause (「起きたこと」「何が起きたか」) instead of
+  a noun (「事例」「経過」). Exception: a header that *is* the classifying
+  question (「介入したあと別の物理作用が出るか」) stays a question.
+- A prior-art comparison table with no slide saying what is actually new —
+  the table shows differences, not the claim. Add one slide: existing
+  mechanisms on the left, what you layered on top on the right.
+- A background/problem slide whose heading does not say it is the problem
+  slide, or that asserts a problem with no cited real-world incident.
 - Translucent nodes that let lines bleed through; open "hand-drawn" arrowheads;
   persistent pulse/blink animation.

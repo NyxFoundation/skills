@@ -7,8 +7,9 @@ description: |
   and ship it to Drive with rclone. Covers the design-system layer (tokens, type scale, 12-column grid),
   the OOXML workarounds python-pptx has no API for (letter-spacing, fill alpha, curve smoothing, theme
   shadows, group transforms), the text-metrics problem and how to survive it, the Google Slides importer
-  traps that make a file refuse to open, Assertion–Evidence headline rules that stop copy reading as
-  try-hard, and the Japanese-typography trap where an italic Latin serif fake-slants CJK. Trigger on:
+  traps that make a file refuse to open, Nyx's diagram-first editorial rules (terse noun-phrase
+  titles, no redundant annotations or abstract copy), and the Japanese-typography trap where an
+  italic Latin serif fake-slants CJK. Trigger on:
   「スライドを作って」「pptx で作って」「PowerPoint の資料」「デッキを組んで」「python-pptx で」
   「スライドの構成を考えて」, or any request to produce an editable slide deck rather than a rendered image.
 ---
@@ -31,6 +32,22 @@ locally and then broke somewhere else.
 
 Row 3 is the point. A deck built by hand in PowerPoint cannot be regenerated next month with new
 numbers. One built from a script can.
+
+### Nyx editorial default
+
+When working in `nyx-decks` (or when the user requests its style), the slide is a **diagram or
+data object first**, not a written argument with decoration. Apply these defaults unless the user
+explicitly selects another style:
+
+- Use a one-line, concrete **noun-phrase title**. It names the object or relationship being shown;
+  the claim belongs in the visual, the talk track, and the decision sheet.
+- Give every content slide one primary visual: a diagram, chart, comparison, timeline, or compact
+  table. Native PowerPoint shapes are preferred over pasted screenshots.
+- Remove explanatory sentences, legends, captions, process labels, and caveats when the visual,
+  direct labels, or spoken explanation already convey them. Keep a qualifier on-slide only when it
+  changes the scope or truth of the claim; put the rest in notes.
+- Prefer observed facts, named systems, and explicit relations. Do not use future-world slogans,
+  rhetorical questions, or abstract prose to supply importance the evidence does not show.
 
 ---
 
@@ -110,28 +127,38 @@ are **monthly cartridge** if the deck recurs.
 ### 2.5 The decision sheet — fill this in before writing any code
 
 Rounds are spent on **decisions**, not on execution. Measured across one deck: ten review rounds,
-and every one of them turned on a choice that could have been made up front — what the headline
-asserts, what the figure's vocabulary is, where the visual weight sits. Once those were settled the
-code converged in one or two rounds.
+and every one of them turned on a choice that could have been made up front — what the slide must
+make clear, what the figure's vocabulary is, where the visual weight sits. Once those were settled
+the code converged in one or two rounds.
 
-So write these six lines per slide, in the plan, before opening an editor.
+So write these ten lines per slide, in the plan, before opening an editor.
 
 ```
 1. 誰に      この分野の何を知らない人か
-2. 見出し    実現する世界を平叙文で（現状の否定にしない。§1.1）
-             連作なら文型を固定（§1.2）
-3. 証拠      写真 / スクショ / 図 / 数字 のどれか 1 つ
-4. 図なら    問い(Roam) → 数字なら比較(Zelazny)／関係(Duarte) → 版面(A〜K)
+2. 見出し    体言止め一段。図が示す対象・関係を具体語で置く
+             （例: 「承認内容と実行内容の照合」）。主張文やポエムにしない
+3. 要点      聞き手が図から理解する事実を、計画には平叙文で 1 つ書く
+4. 証拠      図 / チャート / 比較 / タイムライン / 表の主視覚を 1 つ選ぶ
+5. 図なら    問い(Roam) → 数字なら比較(Zelazny)／関係(Duarte) → 版面(A〜K)
              ノードの語彙・アイコン・箱の形（§4.5）
-5. 強調      色を点ける 1 箇所だけ。赤茶＝未着手 / 青＝検証が効いている
-6. 開く語    残す固有名詞はどれか。残り全部を日常語に開く
+6. 強調      色を点ける 1 箇所だけ。赤茶＝未着手 / 青＝検証が効いている
+7. 開く語    残す固有名詞はどれか。残り全部を日常語に開く
+8. 注記      図から読めない、かつ画面で必要な限定だけを残す。残りはノートへ
+9. 役割      背景 / 仕組み / 比較 / 新規性 / 限定 / 索引 のどれか。
+             **その役割が見出しだけで読めるか**（layout-patterns §4.7a）
+10. 締めの一行 図の下に置く一文。常体で言い切る。
+             **前後の枚の締めと同じ構文になっていないか**（slide-copy-rules §2.1）
 ```
 
-Two checks on the sheet itself, before you build:
+Four checks on the sheet itself, before you build:
 
 - **ブロックは 3 つまでか**（§2.6）。4 つ以上ある枚は、その時点で「ダサい」と言われる
-- **見出しで言ったことが、図の中にも現れるか。** 「証明で担保される」と締めるのに図に青い
-  要素が 1 つも無ければ、図は現状しか語っていない
+- **計画の要点が、図の中にも現れるか。** 図が言っていない結論を、見出しや注記の文だけで
+  足していないか
+- **10 行目（締めの一行）だけを全枚ぶん縦に並べて読む。** 同じ構文が 3 枚続いていたら、
+  そこが直す場所。1 枚ずつ書いていると気づけない（`slide-copy-rules.md` §2.1）
+- **図に符号（塗り分け・形・線の太さ）を使う枚は、その意味を画面のどこに置くか**を
+  この時点で決める。「ノートに書く」は決めたことにならない（`layout-patterns.md` §5.1）
 
 Auditing a deck you already built by *labelling* each slide with a type is not an audit — you will
 pass yourself every time. **Re-derive from step 1 with the existing slide out of view**, then
@@ -186,9 +213,8 @@ uv run assets/selfcheck.py out/deck.pptx
 
 A reviewer's first two rounds are mostly findings a script can make. Measured on one deck: of the
 19 findings across rounds 1 and 2, **14 (74%) were mechanically detectable** — duplicate kickers,
-an agenda that does not cover its sections, a headline that describes an activity instead of making
-a claim, counts that do not add up across slides, numbers with no label, a name listed once and
-never mentioned again.
+an agenda that does not cover its sections, titles that merely record an activity, counts that do
+not add up across slides, numbers with no label, a name listed once and never mentioned again.
 
 **Do not send a deck to the reviewer until this exits 0.** Each round costs 5–15 minutes and a
 reviewer that spends its budget on mechanical findings never reaches the judgment calls.
@@ -263,8 +289,11 @@ Tell the recipient, unprompted:
 - **Never size a text box by eye.** Estimate the line count with a safety factor.
 - **Never italicise CJK with a Latin serif.** It fake-slants. This alone can make a deck read as
   try-hard.
-- **Never write a headline that ends in 「〜の話。」「〜こと。」.** Assertion–Evidence: one claim,
-  as a full sentence.
+- **For Nyx decks, use a one-line noun-phrase title.** It must name a concrete object, comparison,
+  boundary, or relation shown on the slide. Do not turn the title into a slogan, a rhetorical
+  question, or a full-sentence claim.
+- **Do not add annotation by default.** Retain a label only when it lets the audience decode the
+  visual or when omitting a qualifier would make the claim untrue. Move everything else to notes.
 - **Never put a fact on a slide you cannot source.** `[要確認]` does not ship silently — say it.
 - **Never lay out a slide without naming its type first.** Untyped slides default to text rows.
 - **Never read a slide's own sentences aloud.** Redundancy principle — reading and listening
