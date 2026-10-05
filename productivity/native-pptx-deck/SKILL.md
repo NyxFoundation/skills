@@ -30,8 +30,8 @@ locally and then broke somewhere else.
 | 2 | Render | `.pdf` + per-slide `.png` | What **you** look at every round, and what you ship alongside for anyone without the fonts |
 | 3 | Build scripts | `.py` in the repo | Design layer + content layer. The reproducible source |
 
-Row 3 is the point. A deck built by hand in PowerPoint cannot be regenerated next month with new
-numbers. One built from a script can.
+Row 3 keeps the deck reproducible. When the user manually edits a generated deck, bring those
+edits back into the source before regenerating; see `references/manual-source-sync.md`.
 
 ### Nyx editorial default
 
@@ -39,8 +39,8 @@ When working in `nyx-decks` (or when the user requests its style), the slide is 
 data object first**, not a written argument with decoration. Apply these defaults unless the user
 explicitly selects another style:
 
-- Use a one-line, concrete **noun-phrase title**. It names the object or relationship being shown;
-  the claim belongs in the visual, the talk track, and the decision sheet.
+- Default to a short, concrete **noun-phrase title**. A message title is also appropriate when it
+  states a specific, evidence-backed finding or implication. Avoid abstract descriptions of activity.
 - Give every content slide one primary visual: a diagram, chart, comparison, timeline, or compact
   table. Native PowerPoint shapes are preferred over pasted screenshots.
 - Remove explanatory sentences, legends, captions, process labels, and caveats when the visual,
@@ -48,6 +48,13 @@ explicitly selects another style:
   changes the scope or truth of the claim; put the rest in notes.
 - Prefer observed facts, named systems, and explicit relations. Do not use future-world slogans,
   rhetorical questions, or abstract prose to supply importance the evidence does not show.
+- Omit small section kickers such as `03 ／ mulu ・13`; use the main title to orient the audience.
+  A title and one clear figure can be a complete slide. Leads and closing sentences are optional.
+
+For a technical case study, start with the actual tool, its operating principle, and a concrete
+result from its repository. Develop these reusable case slides before forcing an overall narrative.
+Read `references/technical-case-studies.md` for evidence selection, circuit diffs and formal claims.
+For an exact reproduction request, use `references/manual-source-sync.md` instead of redesigning.
 
 ---
 
@@ -76,6 +83,8 @@ or when the same deck ships **every month** with new numbers.
 | `references/layout-patterns.md` | **Choosing a layout — read before laying out a single slide.** Design principles with sources, the baseline-row grid, density budgets, and 11 page layouts keyed to slide purpose |
 | `references/slide-type-catalogue.md` | **Choosing what to draw inside the layout.** 69 collected diagram/slide types with sources (Duarte, Roam, Zelazny, SmartArt, consulting decks), folded into a 12-item working list |
 | `references/slide-copy-rules.md` | Writing headlines and body copy — **read before writing a single headline** |
+| `references/technical-case-studies.md` | Explaining a research tool, formal verification result, or implementation improvement |
+| `references/manual-source-sync.md` | Bringing manual edits back into a reproducible local build |
 | `references/portability.md` | The file will not open, or renders differently somewhere |
 | `references/review-loop.md` | Driving the render → look → fix cycle and the external review |
 
@@ -101,7 +110,11 @@ If the venue has a written description (an event page, an invite), **read it**. 
 heat-engineering narrative was rejected with 「構成がいまみたけど変すぎる」 because the event page said
 「スライドや完成された発表ではなく、雑に話す場」. Four rounds of review had already passed by then.
 
-### 2. Agree the slide list as a table
+### 2. Develop the evidence, then the slide list
+
+For case-study talks, first make the concrete cases understandable on their own. Read the source
+and choose the result to show before arranging an introduction, transitions and conclusion.
+Use an existing audience brief and accepted edits; do not reopen settled decisions.
 
 ```
 | # | 枚 | 聞き手に何が分かってほしいか | 載せる事実 | 型 |
@@ -121,8 +134,9 @@ The catalogue's §0 gives the order to pick in: what question does this slide an
 if it is numbers, which comparison (Zelazny) → if not, which relation (Duarte) → which page
 layout. **If step 1 has two answers, the slide has two messages — split it before drawing.**
 
-Get a nod on this before writing code. Also decide now which slides are **fixed chassis** and which
-are **monthly cartridge** if the deck recurs.
+Use this table to make unresolved decisions visible. Continue within the user's existing direction
+without adding an approval round. Also identify **fixed chassis** and **monthly cartridge** slides
+if the deck recurs.
 
 ### 2.5 The decision sheet — fill this in before writing any code
 
@@ -135,8 +149,8 @@ So write these ten lines per slide, in the plan, before opening an editor.
 
 ```
 1. 誰に      この分野の何を知らない人か
-2. 見出し    体言止め一段。図が示す対象・関係を具体語で置く
-             （例: 「承認内容と実行内容の照合」）。主張文やポエムにしない
+2. 見出し    具体的な体言止め、または図の発見・示唆を述べる短い主張文
+             （例: 「Leanを用いた静的解析ツール」）。抽象的な活動説明にしない
 3. 要点      聞き手が図から理解する事実を、計画には平叙文で 1 つ書く
 4. 証拠      図 / チャート / 比較 / タイムライン / 表の主視覚を 1 つ選ぶ
 5. 図なら    問い(Roam) → 数字なら比較(Zelazny)／関係(Duarte) → 版面(A〜K)
@@ -146,8 +160,8 @@ So write these ten lines per slide, in the plan, before opening an editor.
 8. 注記      図から読めない、かつ画面で必要な限定だけを残す。残りはノートへ
 9. 役割      背景 / 仕組み / 比較 / 新規性 / 限定 / 索引 のどれか。
              **その役割が見出しだけで読めるか**（layout-patterns §4.7a）
-10. 締めの一行 図の下に置く一文。常体で言い切る。
-             **前後の枚の締めと同じ構文になっていないか**（slide-copy-rules §2.1）
+10. 補足の要否 図だけで伝わるなら締めの一行は置かない。必要な場合のみ短い常体文。
+             **前後の枚と同じ構文を反復していないか**（slide-copy-rules §2.1）
 ```
 
 Four checks on the sheet itself, before you build:
@@ -155,7 +169,7 @@ Four checks on the sheet itself, before you build:
 - **ブロックは 3 つまでか**（§2.6）。4 つ以上ある枚は、その時点で「ダサい」と言われる
 - **計画の要点が、図の中にも現れるか。** 図が言っていない結論を、見出しや注記の文だけで
   足していないか
-- **10 行目（締めの一行）だけを全枚ぶん縦に並べて読む。** 同じ構文が 3 枚続いていたら、
+- **採用した締めの一行だけを全枚ぶん縦に並べて読む。** 同じ構文が 3 枚続いていたら、
   そこが直す場所。1 枚ずつ書いていると気づけない（`slide-copy-rules.md` §2.1）
 - **図に符号（塗り分け・形・線の太さ）を使う枚は、その意味を画面のどこに置くか**を
   この時点で決める。「ノートに書く」は決めたことにならない（`layout-patterns.md` §5.1）
@@ -289,9 +303,8 @@ Tell the recipient, unprompted:
 - **Never size a text box by eye.** Estimate the line count with a safety factor.
 - **Never italicise CJK with a Latin serif.** It fake-slants. This alone can make a deck read as
   try-hard.
-- **For Nyx decks, use a one-line noun-phrase title.** It must name a concrete object, comparison,
-  boundary, or relation shown on the slide. Do not turn the title into a slogan, a rhetorical
-  question, or a full-sentence claim.
+- **For Nyx decks, use a concrete title.** Prefer a short noun phrase; use a message title when
+  the figure supports a specific finding or implication. Preserve titles in an exact-copy task.
 - **Do not add annotation by default.** Retain a label only when it lets the audience decode the
   visual or when omitting a qualifier would make the claim untrue. Move everything else to notes.
 - **Never put a fact on a slide you cannot source.** `[要確認]` does not ship silently — say it.

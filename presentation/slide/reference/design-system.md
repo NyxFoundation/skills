@@ -2,7 +2,8 @@
 
 The visual language for slides in this repo, distilled from `CLAUDE.md`,
 `style.css`, and the company-deck / nanto-deck slides. Matches the Nyx HP
-(`tokens.css`). When this and `CLAUDE.md` disagree, `CLAUDE.md` wins.
+(`tokens.css`). Current user direction and accepted manual edits take precedence;
+use `CLAUDE.md` for conventions not settled by that direction.
 
 ## 1. Color tokens — values fixed, meanings fixed
 
@@ -36,9 +37,8 @@ highlighted (accent-framed) element per visual; everything else is a `--line`
 | `Inter` | `--font-sans` default UI/body |
 | `BIZ UDPMincho` | wordmark (`Nyx Foundation`, `AI` symbol); set with `!important` to beat the global sans |
 
-H1 (`nx-display`) is Cormorant + Shippori, weight 300, with the core phrase in
-`<em>` → italic + accent blue. `<em>` is a *semantic* "this is the core of the
-sentence" tag, not generic bold emphasis.
+H1 (`nx-display`) uses the deck's Cormorant + Shippori stack, weight 300.
+Emphasis is optional. Reserve italic for suitable Latin/math runs; do not fake-slant Japanese.
 
 ## 3. Font-size hierarchy — HARD FLOOR, enforce in SVG too
 
@@ -59,18 +59,17 @@ must hit this floor too, applied **via `class`**, never raw `font-size`
 attributes. The rule the design critic enforces: every element large and
 high-contrast enough for an elderly viewer in the back row.
 
-## 4. Heading + layout skeleton (every slide)
+## 4. Heading + layout skeleton (default for new slides)
 
 ```
-[nx-kicker]   mono UPPER, 0.18em tracking, top hairline rule.  e.g.  01 ／ 問題
-[nx-display]  Cormorant + Shippori h1, ~36px, core phrase in italic <em>
-(optional) verse-line-lead   2px left rule + bg-2, ONE line of lead
+[nx-display]  short concrete title, ~36px; noun phrase or evidence-backed finding
+(optional) verse-line-lead   ONE line only if it adds information needed to read the figure
 MAIN VISUAL  one large inline SVG — let the figure carry the message
 ```
 
-Kicker form is `数字 ／ 日本語` (`01 — The Problem` is wrong). Lead `<b>` keys a
-vocabulary term, closed in ink black (not accent). One visual per slide; body is
-the verse line at most — cut the rest.
+Omit small section kickers (`03 ／ mulu ・13` etc.) by default. Use the main title for orientation.
+Lead `<b>` keys a vocabulary term in ink black. One visual per slide; a lead or closing line
+is optional. Preserve the user's chosen information density when reproducing a manual edit.
 
 ### Slide file structure (`slides/SLNN.md`)
 
@@ -80,10 +79,8 @@ layout: default
 ---
 <div class="sec">
   <div class="sec-head">
-    <span class="nx-kicker">02 ／ 私たちの答え</span>
-    <h1 class="nx-display">誰が言うかより、<em>何が確かめられたか</em>。</h1>
+    <h1 class="nx-display">Leanを用いた静的解析ツール</h1>
   </div>
-  <div class="verse-line-lead">...one line...</div>
   <div class="vt-wrap">
     <svg viewBox="0 0 1000 320" class="vt-chart" xmlns="http://www.w3.org/2000/svg">
       ...inline SVG, text styled by class...

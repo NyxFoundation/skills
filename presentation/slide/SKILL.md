@@ -25,12 +25,35 @@ instead; come here for the visual execution of each slide.
    rubric, the export commands, and the convergence rule. **Open it before you
    start polishing.**
 
-The repo's `CLAUDE.md` is the authoritative source these distill; if it and a
-reference disagree, `CLAUDE.md` wins.
+These are design defaults. Follow the user's current direction and accepted manual edits first;
+use the repo's `CLAUDE.md` for conventions not settled by that direction.
+
+## Technical case studies: decide before drawing
+
+- Develop concrete case slides before forcing a deck narrative. Read the actual repository:
+  implementation, specification/assertions, verification setup and result. Explain what the tool
+  does, its operating principle, and one observed result using the same example.
+- Choose the visual from the relationship: a circuit for hardware, a state graph for allowed and
+  rejected transitions, a partition table for abstracted values, an architecture for tool roles.
+  Consecutive generic flowcharts do not explain these differences.
+- Give the eye one route through a dominant figure. For comparisons, align corresponding parts
+  within a single comparison; avoid two unrelated figures competing for attention.
+- Show a formal check's input domain, relevant timing/assumptions, expected result and actual
+  discrepancy at the affected component. A tool name or a success badge alone is insufficient.
+  Bound the claim to the actual check; distinguish formal results from audits and demonstrations.
+- Draw circuit wires with straight segments and right-angle bends, explicit junctions and clear
+  crossings. Curved return edges may suit a state graph. Use tool logos to identify actual roles.
+- For an improvement, retain the baseline's orientation and highlight changed components. Put
+  multiplier counts or table-word reductions beside the part that changed, with source-backed
+  units. Avoid listing trivial edits when the circuit diff already conveys the improvement.
+- Cut a redundant slide when the previous slide already explains its point. A short title and
+  one figure can be enough; do not refill the space with process labels or restatements.
+- When asked to reproduce a manual version exactly, preserve its deletions, order and formatting.
+  Bring it into the build source; do not run a redesign pass or restore deleted explanations.
 
 ## The non-negotiables (full detail in `reference/design-system.md`)
 
-- **One slide, one visual.** Body text is a kicker + a one-line lead at most;
+- **One slide, one visual.** A title and the figure are sufficient; a one-line lead is optional;
   the rest of the message lives in a single large inline SVG. No 2×2 grids — one
   focal point, one eye-path (title → key visual → support).
 - **Color is semantic and fixed.** `--accent` deep blue `#1f3a52` = verify /
@@ -39,12 +62,12 @@ reference disagree, `CLAUDE.md` wins.
 - **Font sizes have a hard floor.** Display title 36px, lead 16px, kicker 12px,
   card body ≥ 14px, labels ≥ 12px, SVG text ≥ 13px. Sub-legible type is a defect
   — it must be readable by an elderly viewer in a projected room.
-- **Heading structure is fixed.** `nx-kicker` (`01 ／ 日本語`, mono uppercase) →
-  `nx-display` h1 with the *core* phrase wrapped in `<em>` (italic Cormorant,
-  accent blue). `<em>` marks the sentence's core, not mere emphasis. The h1 must
-  fit **one line** — shorten rather than wrap. No `──` em-dash spam; avoid
-  declarative hype / military metaphors in titles and kickers (青天井・希少・本丸・
-  既成事実). Kickers are plain section words (背景／現状／課題／答え, コンペ／カンファレンス).
+- **Heading structure is simple.** Use `nx-display` h1, usually a short concrete noun phrase
+  (e.g. 「Leanを用いた静的解析ツール」). A message title should state an evidence-backed
+  finding or implication. Omit small section kickers such as `03 ／ mulu ・13` by default.
+  Aim for one line when authoring; preserve the user's layout in exact-reproduction tasks.
+  Do not force italic `<em>` onto Japanese text. No `──` em-dash spam or
+  declarative hype / military metaphors (青天井・希少・本丸・既成事実).
   `BIZ UDPMincho` is **wordmark-only** — never for headings, numbers, or buttons.
 - **One concept = one word, deck-wide.** Don't drift terms (e.g. Trust は「信頼」で
   統一し「信用」と混ぜない). Read a strategy/type from **position + arrows + edge
