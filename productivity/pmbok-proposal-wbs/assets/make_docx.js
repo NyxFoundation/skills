@@ -142,15 +142,24 @@ function code(lines, opt = {}) {
   });
 }
 
-// widthIn in inches; transformation is px @96dpi
-function figure(pngPath, widthIn, imgW, imgH) {
+// PNG の IHDR から実寸を読む。寸法をハードコードすると、図を描き直したときに
+// docx 側だけ古い値が残り、画像が引き伸ばされる。実際に 2 枚で起きた。
+function pngSize(buf) {
+  if (buf.readUInt32BE(0) !== 0x89504e47) throw new Error("not a PNG: " + buf.slice(0, 8));
+  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+}
+
+// widthIn in inches; transformation is px @96dpi。高さは PNG から算出する。
+function figure(pngPath, widthIn) {
+  const data = fs.readFileSync(pngPath);
+  const { w, h } = pngSize(data);
   const px = Math.round(widthIn * 96);
   return new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { before: 160, after: 60 },
     children: [new ImageRun({
-      type: "png", data: fs.readFileSync(pngPath),
-      transformation: { width: px, height: Math.round(px * imgH / imgW) },
+      type: "png", data,
+      transformation: { width: px, height: Math.round(px * h / w) },
     })],
   });
 }
@@ -262,7 +271,7 @@ push(ganttTable(
 push(note("数字は日付です。日程は営業日通番を正とし、日付は参考値です。"));
 
 // 図：mermaid やコードブロックではなく、レンダリング済み画像を貼る
-// push(figure("fig_xxx.png", 6.35, 2032, 2135));
+// push(figure("fig_xxx.png", 6.35));
 // push(caption("説明のために作成した例です。"));
 
 // ═══════════════════════════════════════════════ document

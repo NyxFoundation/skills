@@ -212,6 +212,9 @@ Nothing in the docx may reveal that it was drafted, revised, or reasoned about.
 - **No self-criticism.** Corrections belong in the repo commit message, not the deliverable
 - **No AI tells.** Repeated identical sentence endings, 過剰敬語（でございます／申し上げます）, mechanical
   enumeration, empty intensifiers, over-hedging. Write です・ます, short sentences
+- **章タイトル・図タイトルは名詞句のラベル。** 「背景」「目的と基本方針」「検証手法」「適用範囲と限界」。
+  結論を埋め込んだメッセージ見出しはキャッチコピー調に読まれ、客先で AI が書いた気配として指摘される
+  （`client-ready-rules.md` 5b）。`natural-japanese` の第2条はここでは適用しない
 - **No unqualified superlatives.** 「原理的に不可能」「唯一」「最高水準」「確実に」「最も容易」
   → attach the condition: 「確認した公開情報の範囲では」「前提条件が満たされていれば」
 

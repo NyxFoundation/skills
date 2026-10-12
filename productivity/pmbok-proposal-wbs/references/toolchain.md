@@ -84,6 +84,14 @@ new ImageRun({ type: "png", data: fs.readFileSync(path),
 
 `transformation` is in pixels at 96 dpi. For a 6.35 in wide figure: `6.35 * 96 = 610`.
 
+**画像の寸法はハードコードしない。** PNG の IHDR（バイト 16〜23）から読んで高さを算出する。
+`figure(path, widthIn, imgW, imgH)` のように呼び出し側に寸法を書くと、図を描き直したときに
+docx 側だけ古い値が残り、画像が引き伸ばされる。レビューでは気づかれず、依頼者に「図が潰れている」
+と言われて発覚した。`assets/make_docx.js` の `figure()` は PNG から実寸を読む実装になっている。
+
+図を描き直したあとは、図の下端が切れていないかを Read ツールで必ず目視する。matplotlib で
+余白を切るために `ylim` の下端を上げていると、切りすぎて最下段の枠が消えることがある。
+
 ### Other
 
 - `PageBreak` must be inside a `Paragraph`
