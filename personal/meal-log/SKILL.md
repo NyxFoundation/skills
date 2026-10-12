@@ -43,6 +43,7 @@ When the user provides a meal description or image:
 - **Zero kcal**: Only water/tea-like items are allowed to have 0 kcal. Others require `--allow-zero`.
 - **Recalculation**: The workbook uses LibreOffice (`soffice`) for headless recalculation of cached formula values. If `soffice` is missing, values may not update until the file is opened in a spreadsheet app.
 - **Graph Latency**: If the user reports a graph isn't updating, verify that the data was actually appended to the `記録` sheet and that the `日次`/`週次`/`月次` sheets were extended to cover the new date.
+- **Chart Axis Corruption (fixed 2026-09-21)**: Never use `hasattr(v, "date")` for date checks in `meal_lib.py` — in-memory openpyxl workbooks hold `datetime.date` in aggregate sheet column A (only freshly-read files hold `datetime`), so hasattr silently returns False and chart ranges collapse to header-only (`$A$2:$A$1` reversed refs). Always use `as_date()`. `check_meal.py` now validates that every chart's category reference reaches the last data row ("横軸参照が N 行目まで届いていない"), so a corrupted workbook is rejected before sync. If charts look wrong, run `uv run check_meal.py` first, then `uv run build_meal_log.py` to regenerate.
 
 ## Verification Steps
 - `uv run check_meal.py`: Confirms sheets, charts, and formulas are correct.
