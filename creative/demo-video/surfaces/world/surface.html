@@ -1,0 +1,183 @@
+  <svg class="sprite" aria-hidden="true"><defs>
+    <!-- agent roles -->
+    <symbol id="ic-arb" viewBox="0 0 16 16"><path d="M2 6h9M8.5 3 12 6l-3.5 3M14 10H5m3.5 3L5 10l3.5-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-lp" viewBox="0 0 16 16"><rect x="2.2" y="2.2" width="11.6" height="11.6" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="5.6" y="5.6" width="4.8" height="4.8" rx="1" fill="currentColor"/></symbol>
+    <symbol id="ic-lend" viewBox="0 0 16 16"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="ic-base" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="ic-deploy" viewBox="0 0 16 16"><path d="M8 1.8 13.6 5v6L8 14.2 2.4 11V5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-eye" viewBox="0 0 16 16"><path d="M1.4 8s2.6-4.3 6.6-4.3S14.6 8 14.6 8s-2.6 4.3-6.6 4.3S1.4 8 1.4 8z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1.9" fill="currentColor"/></symbol>
+    <!-- contract kinds -->
+    <symbol id="ic-brain" viewBox="0 0 16 16"><path d="M8 2.6v10.8M8 5.2 5 3.6M8 5.2l3-1.6M8 9.4l-3.4 1.9M8 9.4l3.4 1.9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="2.6" r="1.5" fill="currentColor"/><circle cx="4.6" cy="3.3" r="1.3" fill="currentColor"/><circle cx="11.4" cy="3.3" r="1.3" fill="currentColor"/><circle cx="4.3" cy="11.6" r="1.3" fill="currentColor"/><circle cx="11.7" cy="11.6" r="1.3" fill="currentColor"/></symbol>
+    <symbol id="ic-chain" viewBox="0 0 16 16"><rect x="1.3" y="5.2" width="5.4" height="5.6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="9.3" y="5.2" width="5.4" height="5.6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.7 8h2.6" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="ic-pool" viewBox="0 0 16 16"><circle cx="5.8" cy="8" r="3.9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10.2" cy="8" r="3.9" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="ic-market" viewBox="0 0 16 16"><path d="M2.6 12.6V7.4M6.2 12.6V3.6M9.8 12.6V6M13.4 12.6V9.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="ic-stake" viewBox="0 0 16 16"><path d="M8 1.9 14.1 8 8 14.1 1.9 8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-cdp" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 2.4v11.2M2.4 8h11.2" stroke="currentColor" stroke-width="1.4"/></symbol>
+    <symbol id="ic-unknown" viewBox="0 0 16 16"><path d="M8 2.2 14.6 13.4H1.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 6.6v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="11.5" r=".95" fill="currentColor"/></symbol>
+  </defs></svg>
+
+  <div class="grid"></div>
+
+  <div class="top">
+    <div class="brand"><img class="mark" alt="" src="data:image/png;base64,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">Eris — Agentic Economy Simulator</div>
+    <div class="sep"></div>
+    <div class="meta">regime <b>crash</b> · seed <b>101</b> · epoch <b>s=7/40</b></div>
+    <div class="sep"></div>
+    <div class="meta" id="stMsg">idle</div>
+    <div class="right">
+      <div class="meta">chain <b>31337</b> · <b id="nAg">0</b> agents</div>
+      <div class="blk"><i></i><span id="blkNo">block 0</span></div>
+    </div>
+  </div>
+
+  <div class="map"><div class="cam" id="cam">
+    <div class="colhd" style="left:24px;top:2px">32 wallets · one process each, all deciding every block</div>
+    <div class="colhd" style="left:600px;top:2px">the chain · 2.0s blocks</div>
+    <div class="colhd" style="left:1310px;top:2px">contracts · state</div>
+
+    <div class="chip" id="g1" style="left:24px;top:30px" data-name="adaptive-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">adaptive-arb</span><span class="gp">·</span></div>
+    <div class="chip" id="g2" style="left:234px;top:30px" data-name="arb-bot"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">arb-bot</span><span class="gp">·</span></div>
+    <div class="chip" id="g3" style="left:24px;top:66px" data-name="basis-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">basis-arb</span><span class="gp">·</span></div>
+    <div class="chip" id="g4" style="left:234px;top:66px" data-name="bench-max"><svg class="ic"><use href="#ic-base"/></svg><span class="gn">bench-max</span><span class="gp">·</span></div>
+    <div class="chip" id="g5" style="left:24px;top:102px" data-name="clean-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">clean-arb</span><span class="gp">·</span></div>
+    <div class="chip" id="g6" style="left:234px;top:102px" data-name="cross-venue-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">cross-venue-arb</span><span class="gp">·</span></div>
+    <div class="chip" id="g7" style="left:24px;top:138px" data-name="discovery-arb-verify"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">discovery-arb-verify</span><span class="gp">·</span></div>
+    <div class="chip" id="g8" style="left:234px;top:138px" data-name="discovery-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">discovery-arb</span><span class="gp">·</span></div>
+    <div class="chip evil" id="g9" style="left:24px;top:174px" data-name="exploit-hunter"><svg class="ic"><use href="#ic-base"/></svg><span class="gn">exploit-hunter</span><span class="gp">·</span></div>
+    <div class="chip" id="g10" style="left:234px;top:174px" data-name="flash-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">flash-arb</span><span class="gp">·</span></div>
+    <div class="chip" id="g11" style="left:24px;top:210px" data-name="levered-long"><svg class="ic"><use href="#ic-lend"/></svg><span class="gn">levered-long</span><span class="gp">·</span></div>
+    <div class="chip" id="g12" style="left:234px;top:210px" data-name="liquidator"><svg class="ic"><use href="#ic-lend"/></svg><span class="gn">liquidator</span><span class="gp">·</span></div>
+    <div class="chip" id="g13" style="left:24px;top:246px" data-name="lp-mint"><svg class="ic"><use href="#ic-lp"/></svg><span class="gn">lp-mint</span><span class="gp">·</span></div>
+    <div class="chip" id="g14" style="left:234px;top:246px" data-name="lp-provider"><svg class="ic"><use href="#ic-lp"/></svg><span class="gn">lp-provider</span><span class="gp">·</span></div>
+    <div class="chip" id="g15" style="left:24px;top:282px" data-name="lst-carry"><svg class="ic"><use href="#ic-lend"/></svg><span class="gn">lst-carry</span><span class="gp">·</span></div>
+    <div class="chip ship" id="g16" style="left:234px;top:282px" data-name="market-launcher"><svg class="ic"><use href="#ic-deploy"/></svg><span class="gn">market-launcher</span><span class="gp">·</span></div>
+    <div class="chip" id="g17" style="left:24px;top:318px" data-name="market-taker"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">market-taker</span><span class="gp">·</span></div>
+    <div class="chip" id="g18" style="left:234px;top:318px" data-name="max-profit-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">max-profit-arb</span><span class="gp">·</span></div>
+    <div class="chip" id="g19" style="left:24px;top:354px" data-name="multi-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">multi-arb</span><span class="gp">·</span></div>
+    <div class="chip" id="g20" style="left:234px;top:354px" data-name="my-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">my-arb</span><span class="gp">·</span></div>
+    <div class="chip" id="g21" style="left:24px;top:390px" data-name="noop"><svg class="ic"><use href="#ic-base"/></svg><span class="gn">noop</span><span class="gp">·</span></div>
+    <div class="chip" id="g22" style="left:234px;top:390px" data-name="peg-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">peg-arb</span><span class="gp">·</span></div>
+    <div class="chip" id="g23" style="left:24px;top:426px" data-name="random"><svg class="ic"><use href="#ic-base"/></svg><span class="gn">random</span><span class="gp">·</span></div>
+    <div class="chip" id="g24" style="left:234px;top:426px" data-name="redemption-arb"><svg class="ic"><use href="#ic-lend"/></svg><span class="gn">redemption-arb</span><span class="gp">·</span></div>
+    <div class="chip" id="g25" style="left:24px;top:462px" data-name="simple-rule"><svg class="ic"><use href="#ic-base"/></svg><span class="gn">simple-rule</span><span class="gp">·</span></div>
+    <div class="chip" id="g26" style="left:234px;top:462px" data-name="sp-underwriter"><svg class="ic"><use href="#ic-lend"/></svg><span class="gn">sp-underwriter</span><span class="gp">·</span></div>
+    <div class="chip" id="g27" style="left:24px;top:498px" data-name="starter-template"><svg class="ic"><use href="#ic-base"/></svg><span class="gn">starter-template</span><span class="gp">·</span></div>
+    <div class="chip" id="g28" style="left:234px;top:498px" data-name="stat-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">stat-arb</span><span class="gp">·</span></div>
+    <div class="chip evil ship" id="g29" style="left:24px;top:534px" data-name="trap-launcher"><svg class="ic"><use href="#ic-deploy"/></svg><span class="gn">trap-launcher</span><span class="gp">·</span></div>
+    <div class="chip" id="g30" style="left:234px;top:534px" data-name="trove-manager"><svg class="ic"><use href="#ic-lend"/></svg><span class="gn">trove-manager</span><span class="gp">·</span></div>
+    <div class="chip ship" id="g31" style="left:24px;top:570px" data-name="vault-keeper"><svg class="ic"><use href="#ic-deploy"/></svg><span class="gn">vault-keeper</span><span class="gp">·</span></div>
+    <div class="chip" id="g32" style="left:234px;top:570px" data-name="venue-arb"><svg class="ic"><use href="#ic-arb"/></svg><span class="gn">venue-arb</span><span class="gp">·</span></div>
+
+    <!-- ============ the chain ============ -->
+    <div class="chain" id="chain">
+      <h3><svg class="ic"><use href="#ic-chain"/></svg>anvil · 31337 <span id="chainFee">base fee 0.10 gwei</span></h3>
+      <div class="sub">PriceFeed publishes the fair price on-chain, one block late, to everyone</div>
+      <div class="slot"><i id="slotBar"></i></div>
+      <div class="mem">
+        <div class="mh"><span id="memHd">THIS BLOCK</span><span>PRIORITY FEE</span></div>
+        <div class="tx" id="t1"><i></i><b>—</b><span class="who">—</span><span class="fee">—</span></div>
+        <div class="tx" id="t2"><i></i><b>—</b><span class="who">—</span><span class="fee">—</span></div>
+        <div class="tx" id="t3"><i></i><b>—</b><span class="who">—</span><span class="fee">—</span></div>
+        <div class="tx" id="t4"><i></i><b>—</b><span class="who">—</span><span class="fee">—</span></div>
+        <div class="tx" id="t5"><i></i><b>—</b><span class="who">—</span><span class="fee">—</span></div>
+        <div class="tx" id="t6"><i></i><b>—</b><span class="who">—</span><span class="fee">—</span></div>
+        <div class="more" id="memMore">&nbsp;</div>
+      </div>
+      <div class="feed" id="chainFeed">waiting for the first block</div>
+    </div>
+
+    <!-- ============ contracts ============ -->
+    <div class="node venue" id="v1" style="top:24px">
+      <div class="nm"><svg class="ic"><use href="#ic-pool"/></svg>Uniswap V3</div>
+      <div class="ad">0x1B99…cdAC · WETH/USDC</div>
+      <div class="st"><span>pool price</span><b id="v1v">$3,000.00</b></div>
+    </div>
+    <div class="node venue" id="v2" style="top:110px">
+      <div class="nm"><svg class="ic"><use href="#ic-pool"/></svg>Balancer V2</div>
+      <div class="ad">0x1A7A…9ecF · WETH/USDC</div>
+      <div class="st"><span>pool price</span><b id="v2v">$3,000.00</b></div>
+    </div>
+    <div class="node venue" id="v3" style="top:196px">
+      <div class="nm"><svg class="ic"><use href="#ic-pool"/></svg>Curve twocrypto-ng</div>
+      <div class="ad">0xF2Ad…6f859 · WETH/USDC</div>
+      <div class="st"><span>pool price</span><b id="v3v">$3,000.00</b></div>
+    </div>
+    <div class="node venue" id="v4" style="top:282px">
+      <div class="nm"><svg class="ic"><use href="#ic-market"/></svg>Aave V3</div>
+      <div class="ad">0xa513…5C853 · market</div>
+      <div class="st"><span>utilisation</span><b id="v4v">42.0%</b></div>
+    </div>
+    <div class="node venue" id="v5" style="top:368px">
+      <div class="nm"><svg class="ic"><use href="#ic-stake"/></svg>LST vault + pool</div>
+      <div class="ad">0xD49a…817Be</div>
+      <div class="st"><span>discount</span><b id="v5v">0 bps</b></div>
+    </div>
+    <div class="node venue" id="v6" style="top:454px">
+      <div class="nm"><svg class="ic"><use href="#ic-cdp"/></svg>Liquity · eUSD</div>
+      <div class="ad">0xaB7B…B05057 · CDP</div>
+      <div class="st"><span>eUSD</span><b id="v6v">$1.0000</b></div>
+    </div>
+    <div class="node venue unk" id="v7" style="top:540px">
+      <div class="nm"><svg class="ic"><use href="#ic-unknown"/></svg>LeakyVault <span class="tag" id="v7tag">unknown</span></div>
+      <div class="ad">0x8A79…1f04E</div>
+      <div class="st"><span>deployed by vault-keeper</span><b id="v7v">$0</b></div>
+    </div>
+
+    <!-- Both SVG layers live INSIDE the camera, and every coordinate on this map is a
+         layout offset rather than a screen rect — that is what lets the camera push in
+         without the wires sliding off the nodes they connect. -->
+    <svg class="wire" id="wire" width="1600" height="620" viewBox="0 0 1600 620"></svg>
+    <svg class="flow" id="flow" width="1600" height="620" viewBox="0 0 1600 620"></svg>
+  </div></div>
+
+  <!-- ============ what an agent is thinking ============ -->
+  <div class="mind" id="mind">
+    <div class="mhd">
+      <svg class="ic"><use href="#ic-brain"/></svg>
+      <b id="mindTitle">STRATEGY REVISION</b>
+      <span id="mindWho">—</span>
+      <span class="badge" id="mindBadge">idle</span>
+    </div>
+    <div class="mbody">
+      <div class="mcol">
+        <div class="mk" id="mkL">EVIDENCE HANDED TO THE MODEL</div>
+        <div class="ev" id="e1">&nbsp;</div><div class="ev" id="e2">&nbsp;</div>
+        <div class="ev" id="e3">&nbsp;</div><div class="ev" id="e4">&nbsp;</div>
+        <div class="ev" id="e5">&nbsp;</div><div class="ev" id="e6">&nbsp;</div>
+        <div class="ev" id="e7">&nbsp;</div><div class="ev" id="e8">&nbsp;</div>
+      </div>
+      <div class="mcol right">
+        <div class="mk" id="mkR">WHAT IT DECIDED</div>
+        <div class="quote" id="mQuote">&nbsp;</div>
+        <div class="prm" id="p1"><span class="pn">—</span><span class="pf">—</span><span class="pa">▶</span><span class="pt">—</span></div>
+        <div class="prm" id="p2"><span class="pn">—</span><span class="pf">—</span><span class="pa">▶</span><span class="pt">—</span></div>
+        <div class="stamp" id="mStamp">&nbsp;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ history ============ -->
+  <div class="tel">
+    <div class="chd"><span>VENUE PRICE vs FAIR</span><span id="chPriceNow">—</span></div>
+    <svg class="chart" id="chPrice" viewBox="0 0 548 84" preserveAspectRatio="none">
+      <polyline data-k="fair"></polyline>
+      <polyline data-k="uni"></polyline>
+      <polyline data-k="bal"></polyline>
+      <polyline data-k="crv"></polyline>
+    </svg>
+    <div class="lg"><i class="k-fair"></i>fair<i class="k-uni"></i>uniswap<i class="k-bal"></i>balancer<i class="k-crv"></i>curve</div>
+
+    <div class="chd"><span>WALLET BALANCE</span><span id="chBalNow">—</span></div>
+    <svg class="chart" id="chBal" viewBox="0 0 548 84" preserveAspectRatio="none">
+      <polyline data-k="w1"></polyline>
+      <polyline data-k="w2"></polyline>
+      <polyline data-k="w3"></polyline>
+      <polyline data-k="keeper"></polyline>
+      <polyline data-k="hunter"></polyline>
+    </svg>
+    <div class="lg"><i class="k-w"></i>29 wallets<i class="k-keeper"></i>vault-keeper<i class="k-hunter"></i>exploit-hunter</div>
+
+    <div class="ep"><span>epoch <b id="epS">s=7/40</b> · <b id="c1v">0</b> tx/block · <b id="c2v">0%</b> reverted</span><span><b id="epBlk">0</b> / 720</span></div>
+    <div class="epbar"><i id="epBar"></i></div>
+    <div class="note" id="telNote">Round-trip rule: value left inside a contract the environment cannot price is worth <b>zero</b>. The drain nets to a transfer.</div>
+  </div>

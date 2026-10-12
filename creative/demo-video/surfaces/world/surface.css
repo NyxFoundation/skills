@@ -1,0 +1,220 @@
+/* ===== surface: world — a 2D network map of a simulated world =================
+   Left: the wallets, one chip each, dense enough that the roster is the point.
+   Middle: the one thing they all have to go through, with a slot gauge that
+   fills in real time. Right: the contracts holding state. Wires between them,
+   traffic along the wires, a log and live telemetry underneath.
+   ========================================================================== */
+:root{
+  --stage-bg:#080c18;
+  --grid:rgba(120,160,255,.045);
+  --panel:#0e1526; --panel2:#111a2e;
+  --br:#22304f; --br2:#2d3d63;
+  --fg:#c3cfe6; --dim:#6c7c9c; --dim2:#4d5a76;
+  --agent:#7dd3fc;                 /* wallets */
+  --venue:#c4b5fd;                 /* contracts the environment deployed */
+  --unknown:#fbbf24;               /* contracts an agent deployed */
+  --hack:#fb7185;                  /* the adversaries */
+  --ok:#4ade80; --warn:#fbbf24; --bad:#f87171;
+  --accent2:#5fd7d7;
+}
+.stage{background:radial-gradient(1200px 700px at 50% -10%,#101a33 0%,transparent 60%),var(--stage-bg);
+  color:var(--fg);font-family:var(--ui)}
+.grid{position:absolute;inset:0;z-index:0;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:40px 40px}
+
+/* ---------- top chrome ---------- */
+.top{position:absolute;left:0;right:0;top:0;height:56px;z-index:6;display:flex;align-items:center;gap:16px;
+  padding:0 20px;background:#0a1122;border-bottom:1px solid var(--br)}
+.top .brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px;letter-spacing:.2px}
+/* the Eris mark, inlined so the demo stays a single file. Only the butterfly: the
+   wordmark that ships with it is black and this chrome is not. */
+.top .brand .mark{height:26px;width:auto;display:block}
+.top .sep{width:1px;height:20px;background:var(--br)}
+.top .meta{font:12px/1 var(--mono);color:var(--dim)}
+.top .meta b{color:var(--fg);font-weight:500}
+.top .right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.blk{font:13px/1 var(--mono);color:var(--fg);display:flex;align-items:center;gap:8px}
+.blk i{width:7px;height:7px;border-radius:50%;background:var(--dim2);transition:background .15s,box-shadow .15s}
+.stage.tick .blk i{background:var(--accent2);box-shadow:0 0 10px var(--accent2)}
+#stMsg{font:12px/1 var(--mono);color:var(--dim)}
+
+/* ---------- map ---------- */
+.map{position:absolute;left:0;right:0;top:56px;height:620px;z-index:2;overflow:hidden}
+/* the camera. Everything on the map is inside it, so a push-in carries the wires
+   and the traffic with the nodes. */
+.cam{position:absolute;inset:0;transform-origin:0 0;will-change:transform}
+.colhd{position:absolute;font:11px/1 var(--mono);letter-spacing:1.4px;color:var(--dim2);text-transform:uppercase}
+
+/* ---------- wallet chips (32 of them) ---------- */
+.chip{position:absolute;width:202px;height:32px;border:1px solid var(--br);border-radius:6px;
+  background:var(--panel);display:flex;align-items:center;gap:7px;padding:0 8px;z-index:3;
+  opacity:.16;transition:opacity .3s,border-color .25s,background .25s,box-shadow .25s}
+.chip.up{opacity:1}
+/* Category glyphs, one colour each, carried by `color` so the role and the state
+   share a single token. Brand logos were considered and rejected: they are
+   multi-colour, and the only reason the drain lands is that red has not appeared
+   for thirty seconds before it. */
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+.ic{flex:none;fill:none}
+.chip .ic{width:13px;height:13px;color:var(--agent);transition:color .3s,filter .2s}
+.chip .gn{font:11.5px/1 var(--mono);color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip .gp{margin-left:auto;font:10.5px/1 var(--mono);color:var(--dim2);flex:none;transition:color .3s}
+.chip.gain .gp{color:var(--ok)} .chip.loss .gp{color:var(--bad)}
+.chip.send .ic{filter:drop-shadow(0 0 7px currentColor)}
+.chip.lit{border-color:var(--accent2);background:#12233a;box-shadow:0 0 0 1px rgba(95,215,215,.22)}
+.chip.ship{border-color:#4a3d15}
+.chip.ship .ic{color:var(--unknown)}
+/* The adversaries are NOT marked in advance. Red is spent once, on the drain — a
+   colour the audience has not seen for thirty seconds is an event when it lands.
+   `.chip.evil` is applied by the storyboard at the reveal, not by the markup. */
+.chip.evil{border-color:#5c2233;background:#1a0d13}
+.chip.evil .ic{color:var(--hack);filter:drop-shadow(0 0 8px var(--hack))}
+.chip.evil.lit{border-color:var(--hack);background:#2a1119;box-shadow:0 0 0 1px rgba(251,113,133,.3)}
+
+/* ---------- contract nodes ---------- */
+.node{position:absolute;left:1310px;width:256px;height:74px;border:1px solid var(--br);border-radius:9px;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));padding:9px 11px;z-index:3;
+  opacity:.22;transition:opacity .45s,border-color .3s,box-shadow .3s}
+.node.up{opacity:1}
+.node .nm{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--fg);line-height:1.1}
+.node .nm .ic{width:16px;height:16px;color:var(--venue)}
+.node .ad{font:10px/1.5 var(--mono);color:var(--dim2);margin-top:3px}
+.node .st{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;font:11px/1 var(--mono);color:var(--dim)}
+.node .st b{color:var(--fg);font-weight:500;transition:color .3s}
+.node.lit{border-color:var(--accent2);box-shadow:0 0 0 1px rgba(95,215,215,.25),0 0 26px rgba(95,215,215,.16)}
+.node.moved .st b{color:var(--accent2)}
+.node.gain .st b{color:var(--ok)} .node.loss .st b{color:var(--bad)}
+.node.unk{border-color:#5a4718;background:linear-gradient(180deg,#1d1708,#141105)}
+.node.unk .nm .ic{color:var(--unknown)}
+.node .tag{position:absolute;right:9px;top:8px;font:9px/1 var(--mono);letter-spacing:.6px;padding:3px 6px;border-radius:4px;
+  background:#1a2440;color:var(--dim);border:1px solid var(--br)}
+.node .tag.ok{color:var(--ok);border-color:#1e4530;background:#0e2419}
+.node .tag.bad{color:var(--bad);border-color:#54222a;background:#241014}
+.node .tag.warn{color:var(--warn);border-color:#54431a;background:#241d0b}
+
+/* ---------- the chain ---------- */
+.chain{position:absolute;left:600px;top:74px;width:400px;border:1px solid var(--br2);border-radius:11px;
+  background:linear-gradient(180deg,#111c33,#0c1424);z-index:4;padding:12px 13px 13px;
+  box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.chain h3{margin:0 0 3px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.chain h3 .ic{width:15px;height:15px;color:var(--accent2)}
+.chain h3 span{margin-left:auto;font:11px/1 var(--mono);color:var(--dim)}
+.chain .sub{font:10px/1.5 var(--mono);color:var(--dim2)}
+/* the slot gauge: one block's worth of wall clock, filling */
+.slot{height:4px;border-radius:2px;background:#16203a;margin:9px 0 10px;overflow:hidden}
+.slot i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2f6f88,var(--accent2));border-radius:2px}
+.mem{border-top:1px solid var(--br);padding-top:8px}
+.mem .mh{font:10px/1 var(--mono);letter-spacing:1px;color:var(--dim2);margin-bottom:7px;display:flex}
+.mem .mh span:last-child{margin-left:auto}
+.tx{display:grid;grid-template-columns:12px 1fr auto auto;gap:8px;align-items:center;height:24px;
+  font:11px/1 var(--mono);color:var(--dim);border-radius:5px;padding:0 5px;margin-bottom:3px;
+  background:#0d1526;border:1px solid transparent;opacity:0;transition:opacity .2s,background .2s,border-color .2s}
+.tx.on{opacity:1}
+.tx i{width:7px;height:7px;border-radius:50%;background:var(--agent)}
+.tx b{color:var(--fg);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx .who{color:var(--dim);font-size:10px;white-space:nowrap}
+.tx .fee{color:var(--dim);font-size:10px;white-space:nowrap}
+.tx.mined{border-color:#1e4530;background:#0e2419} .tx.mined .fee{color:var(--ok)}
+.tx.rev{border-color:#54222a;background:#200e12} .tx.rev .fee{color:var(--bad)}
+.tx.evil i{background:var(--hack)}
+.mem .more{font:10px/1.6 var(--mono);color:var(--dim2);padding-left:5px;height:16px}
+.chain .feed{margin-top:8px;border-top:1px solid var(--br);padding-top:8px;font:11px/1.5 var(--mono);color:var(--dim);min-height:34px}
+.chain .feed b{color:var(--fg);font-weight:500}
+.stage.busy .chain{border-color:var(--accent2)}
+
+/* ---------- wires + traffic ---------- */
+.wire,.flow{position:absolute;inset:0;pointer-events:none}
+.wire{z-index:1} .flow{z-index:5}
+.wire path{fill:none;stroke:#18243d;stroke-width:1.1}
+.wire path.hot{stroke:var(--accent2);stroke-opacity:.5;stroke-width:1.4}
+.wire path.evil{stroke:var(--hack);stroke-opacity:.65;stroke-width:1.5;stroke-dasharray:5 4}
+.flow circle{filter:drop-shadow(0 0 5px currentColor)}
+
+/* ---------- what an agent is thinking (bottom left) ----------
+   The log this replaced was scrolling text nobody reads from row twelve. What the
+   room wants to see is the loop: the evidence a strategy was handed, what it
+   concluded, and the parameter that moved because of it. The same panel carries the
+   adversary's bytecode search in the second act — both are reasoning, then action. */
+.mind{position:absolute;left:24px;top:690px;width:960px;height:286px;border:1px solid var(--br);border-radius:10px;
+  background:linear-gradient(180deg,#0d1424,#090f1d);z-index:4;display:flex;flex-direction:column;overflow:hidden}
+.mind.evil{border-color:#4a2030;background:linear-gradient(180deg,#170c14,#0b0710)}
+.mhd{height:32px;flex:none;display:flex;align-items:center;gap:9px;padding:0 13px;border-bottom:1px solid var(--br);
+  font:11px/1 var(--mono);letter-spacing:1px;color:var(--dim2)}
+.mhd .ic{width:14px;height:14px;color:var(--accent2)}
+.mind.evil .mhd .ic{color:var(--hack)}
+.mhd b{color:var(--fg);font-weight:600;letter-spacing:1.2px}
+.mhd #mindWho{color:var(--agent);letter-spacing:.4px}
+.mind.evil .mhd #mindWho{color:var(--hack)}
+.mhd .badge{margin-left:auto;letter-spacing:.6px;padding:3px 8px;border-radius:4px;border:1px solid var(--br);
+  background:#131c30;color:var(--dim);font-size:10px}
+.mhd .badge.on{color:var(--ok);border-color:#1e4530;background:#0e2419}
+.mhd .badge.bad{color:var(--hack);border-color:#54222a;background:#241014}
+.mbody{flex:1;display:grid;grid-template-columns:1fr 372px;gap:18px;padding:11px 13px 12px;min-height:0}
+.mcol{min-width:0}
+.mcol.right{border-left:1px solid #16203a;padding-left:16px}
+.mk{font:9.5px/1 var(--mono);letter-spacing:1.1px;color:var(--dim2);margin-bottom:8px}
+.ev{font:11.5px/1.62 var(--mono);color:var(--dim);white-space:pre;overflow:hidden;text-overflow:ellipsis;
+  opacity:0;transform:translateX(-4px);transition:opacity .3s,transform .3s}
+.ev.on{opacity:1;transform:none}
+.ev .h{color:var(--fg)} .ev .w{color:var(--warn)} .ev .k{color:var(--ok)} .ev .e{color:var(--bad)}
+.ev .d{color:var(--dim2)} .ev .a{color:var(--accent2)} .ev .x{color:var(--hack)}
+.quote{font:12.5px/1.55 var(--ui);color:var(--fg);border-left:2px solid var(--accent2);padding:1px 0 1px 11px;
+  margin-bottom:11px;min-height:40px;opacity:0;transition:opacity .4s}
+.quote.on{opacity:1}
+.mind.evil .quote{border-left-color:var(--hack)}
+.prm{display:grid;grid-template-columns:1fr auto 18px auto;align-items:center;gap:8px;height:26px;
+  font:12px/1 var(--mono);opacity:0;transition:opacity .3s}
+.prm.on{opacity:1}
+.prm .pn{color:var(--dim)} .prm .pf{color:var(--dim2);text-decoration:line-through}
+.prm .pa{color:var(--dim2);text-align:center}
+.prm .pt{color:var(--accent2);font-weight:500}
+.prm.on .pa{color:var(--accent2)}
+.stamp{margin-top:9px;font:11px/1.5 var(--mono);color:var(--ok);opacity:0;transition:opacity .35s}
+.stamp.on{opacity:1}
+.mind.evil .stamp{color:var(--hack)}
+
+/* ---------- history (bottom right) ----------
+   Two time series rather than four counters. The crash is a shape, and the drain
+   is two lines being pulled apart — neither reads as anything in a number that
+   simply changes. */
+.tel{position:absolute;left:1000px;top:690px;width:576px;height:286px;border:1px solid var(--br);border-radius:10px;
+  background:linear-gradient(180deg,#0e1526,#0a1120);z-index:4;padding:10px 14px;overflow:hidden}
+.chd{font:10px/1 var(--mono);letter-spacing:1px;color:var(--dim2);display:flex;margin:2px 0 5px}
+.chd span:last-child{margin-left:auto;color:var(--dim)}
+.chart{display:block;width:100%;height:76px;overflow:hidden}
+.chart polyline{fill:none;stroke-width:1.6;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
+.chart polyline[data-k="fair"]{stroke:#8ea0c0;stroke-dasharray:4 3;stroke-width:1.3}
+.chart polyline[data-k="uni"]{stroke:#c4b5fd}
+.chart polyline[data-k="bal"]{stroke:#7dd3fc}
+.chart polyline[data-k="crv"]{stroke:#5fd7d7}
+.chart polyline[data-k^="w"]{stroke:#3d4d6b;stroke-width:1.3}
+.chart polyline[data-k="keeper"]{stroke:var(--unknown);stroke-width:2}
+.chart polyline[data-k="hunter"]{stroke:var(--hack);stroke-width:2}
+.lg{display:flex;align-items:center;gap:5px;font:9.5px/1 var(--mono);color:var(--dim2);margin:4px 0 8px}
+.lg i{width:9px;height:2px;border-radius:1px;margin-left:9px}
+.lg i:first-child{margin-left:0}
+.lg .k-fair{background:#8ea0c0} .lg .k-uni{background:#c4b5fd} .lg .k-bal{background:#7dd3fc}
+.lg .k-crv{background:#5fd7d7} .lg .k-w{background:#3d4d6b}
+.lg .k-keeper{background:var(--unknown)} .lg .k-hunter{background:var(--hack)}
+.ep{font:10.5px/1 var(--mono);color:var(--dim);display:flex;margin-top:2px}
+.ep b{color:var(--fg);font-weight:500} .ep span:last-child{margin-left:auto}
+.epbar{height:4px;border-radius:2px;background:#16203a;overflow:hidden;margin-top:5px}
+.epbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b5c9e,#7dd3fc);transition:width .5s}
+.tel .note{margin-top:7px;font:10.5px/1.45 var(--ui);color:var(--dim);opacity:0;transition:opacity .4s}
+.tel .note.on{opacity:1} .tel .note b{color:var(--fg)}
+
+/* focus: the world goes quiet so one thing can be looked at. Everything fades
+   except what the storyboard has lit. */
+.stage.focus .chip:not(.lit),
+.stage.focus .node:not(.lit),
+.stage.focus .tape,
+.stage.focus .tel{opacity:.22;transition:opacity .5s}
+.stage.focus .wire path:not(.evil){stroke-opacity:.25;transition:stroke-opacity .5s}
+.chip,.node{transition:opacity .4s,border-color .25s,background .25s,box-shadow .25s}
+
+/* caption: read from the back of a room, so bigger than the default and held longer */
+.cap{bottom:330px}
+.cap span{font-size:21px;line-height:1.45;padding:13px 26px;max-width:64%;
+  background:rgba(8,12,24,.93);border-color:rgba(255,255,255,.13)}
+.cap.big span{font-size:24px;padding:14px 30px;max-width:78%}
