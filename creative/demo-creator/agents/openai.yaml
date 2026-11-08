@@ -1,0 +1,4 @@
+interface:
+  display_name: "Demo Creator"
+  short_description: "Create polished demo videos with clear copy and smooth pacing"
+  default_prompt: "Use $demo-creator to create or refine a product demo with restrained text, elegant copy, and coherent scene transitions."
