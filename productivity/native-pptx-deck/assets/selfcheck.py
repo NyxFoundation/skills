@@ -3,31 +3,18 @@
 # requires-python = ">=3.10"
 # dependencies = []
 # ///
-"""外部レビューに出す前のゲート。
+"""PPTXの内容検査補助。描画や意味の確認を代替しない。
 
     uv run assets/selfcheck.py out/deck.pptx
+    uv run assets/selfcheck.py out/deck.pptx --slides 23-27
 
-外部レビュアーが毎回当ててくる指摘のうち、機械的に検出できるものを先に潰す。
-実測では、あるデッキのレビュー 2 周で出た 19 件のうち 14 件（74%）がここで検出できた。
-検査 11（締めの構文）は、依頼者が 2 枚だけ名指しした指摘に対して、
-同じ欠陥を持つ 5 枚を全部挙げた（直した版では 0 件）。
-**通してから外部レビューに出すと、周回が 2〜3 減る。**
-
-検査するもの:
-  1. キッカーの重複        同一キッカーが 2 枚以上に付いている
-  2. 目次の網羅            目次項目が後続セクションを覆っているか
-  3. 数詞と実体数          「N つ」と、実際に並んでいる項目数が合っているか
-  4. 孤立した実体          一覧で名前を出したきり二度と出てこない固有名
-  5. スライド間の算術      「合計 N 件」と内訳の和が合っているか
-  6. 見出しパターン        活動記述・曖昧な述語・抽象的なコピー
-  7. 数字とラベルの近接    ラベルの無い数字（ページ番号・日付は除く）
-  8. 1 枚あたりの項目数    多すぎる枚
-  9. コピー規則            禁止語・禁止表現
- 11. 締めの構文の反復      「〜のは…だからです」型が複数枚の締めに並んでいる\n 10. 枚をまたいだ言い直し  前の枚で言ったことを後の枚が繰り返している
-
-終了コード: 検出があれば 1。
+数字とラベル、目次、数詞、セクション間の算術、見出し、コピーの反復等を確認する。
+画像内の文字は検査しない。見出し・文体・引用等の意味判断は「参考」として出す。
+部分改訂では全体を文脈として読み、指定したページの指摘だけ返す。
+終了コード: 検出があれば1、入力エラーは2。参考だけなら0。
 """
 
+import argparse
 import re
 import sys
 import zipfile
@@ -114,19 +101,37 @@ def extract(path: Path):
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        sys.exit(__doc__)
-    path = Path(sys.argv[1])
+    parser = argparse.ArgumentParser(description="PPTXの内容検査補助。意味と描画は別途確認する。")
+    parser.add_argument("pptx", type=Path)
+    parser.add_argument("--slides", help="1始まりのページ。例: 23-27 または 2,5-8")
+    args = parser.parse_args()
+    path = args.pptx
     slides = extract(path)
+    selected = {s["n"] for s in slides}
+    if args.slides is not None:
+        requested = set()
+        for part in args.slides.split(","):
+            match = re.fullmatch(r"\s*([1-9]\d*)(?:-([1-9]\d*))?\s*", part)
+            if not match:
+                parser.error("invalid --slides range: " + part)
+            first, last = int(match[1]), int(match[2] or match[1])
+            if first > last or last > max(selected, default=0):
+                parser.error("--slides is outside the deck or reversed")
+            requested.update(range(first, last + 1))
+        if not requested <= selected:
+            parser.error("--slides contains missing pages")
+        selected = requested
     hits = []
     notes_out = []
 
     def hit(sl, cat, msg):
-        hits.append((sl, cat, msg))
+        if sl in selected:
+            hits.append((sl, cat, msg))
 
     def note(sl, cat, msg):
         """判定を止めないが、目で見て確かめてほしいもの。"""
-        notes_out.append((sl, cat, msg))
+        if sl in selected:
+            notes_out.append((sl, cat, msg))
 
     # 1. キッカーの重複
     kick = defaultdict(list)
@@ -258,13 +263,13 @@ def main() -> int:
         if not h or s["n"] == 1:
             continue
         if ACTIVITY.search(h):
-            hit(s["n"], "見出し",
-                f"活動記述で止まっている: 「{h}」 → 図に示す対象・比較・関係の体言止めにする")
+            note(s["n"], "見出し",
+                f"活動記述: 「{h}」 → 結果が主題なら、対象・動作・発見まで伝わるか確認する")
         if VAGUE.search(h):
-            hit(s["n"], "見出し", f"述語が曖昧: 「{h}」 → 具体の対象・比較・関係をタイトルにする")
+            note(s["n"], "見出し", f"述語が曖昧: 「{h}」 → 具体の対象・比較・主張を確認する")
         if ABSTRACT_COPY.search(h):
             note(s["n"], "見出し",
-                 f"抽象語を含む: 「{h}」 → 図に描く対象・比較・関係の体言止めになっているか確認する")
+                 f"抽象語を含む: 「{h}」 → 証拠が支える具体的な対象や主張になっているか確認する")
 
     # 7. 数字とラベルの近接
     # ページ番号など額縁の要素は除外する。単独で置かれるのが正しい要素なので、
@@ -302,9 +307,9 @@ def main() -> int:
         body = " ".join(s["lines"])
         for w in BANNED:
             if w in body:
-                hit(s["n"], "コピー規則", f"禁止語「{w}」")
+                note(s["n"], "コピー規則", f"表現「{w}」: 根拠のない強調か確認する。原文引用・指定文言は保持する")
         if body.count("——") + body.count("──") > 1:
-            hit(s["n"], "コピー規則", "em dash が 2 個以上。読点か句点にする")
+            note(s["n"], "コピー規則", "em dash が 2 個以上。原文引用や指定を保ち、不要な装飾なら簡素化する")
 
     # 11. 締めの構文の反復
     # 1 枚ずつ見ても出てこない。枚をまたいで数えないと検出できない種類の欠陥。
@@ -319,12 +324,13 @@ def main() -> int:
     if len(cleft_hits) >= 3:
         ns = ", ".join(str(no) for no, _ in cleft_hits)
         for no, line in cleft_hits:
-            hit(no, "締めの構文",
+            note(no, "締めの構文",
                 f"強調構文＋解説の反復: 「{line[:38]}」"
                 f"（同型が {len(cleft_hits)} 枚: {ns}）。常体の一文で言い切る")
 
     # ── 出力
-    print(f"{path.name} — スライド {len(slides)} 枚\n")
+    scope = f" / 対象 {','.join(map(str, sorted(selected)))}" if args.slides else ""
+    print(f"{path.name} — スライド {len(slides)} 枚{scope}\n")
     if notes_out:
         print("参考（判定は止めない。目で見て確かめる）:")
         for sl, cat, msg in sorted(notes_out, key=lambda h: h[0]):

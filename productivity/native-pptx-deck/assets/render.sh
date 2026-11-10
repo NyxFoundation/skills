@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# .pptx → PDF → 1 枚ずつの PNG → コンタクトシート
+# .pptx → PDF → PNG → contact sheet. ImageMagick is not required.
 #
 #   bash assets/render.sh out/deck.pptx /tmp/render
 #
@@ -14,31 +14,32 @@ PPTX="${1:?usage: render.sh <deck.pptx> [outdir]}"
 OUT="${2:-/tmp/pptx-render}"
 DENSITY="${DENSITY:-110}"
 TILE="${TILE:-3x4}"
+COLS="${TILE%%x*}"
+SKILL_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 PPTX="$(readlink -f "$PPTX")"
-rm -rf "$OUT" && mkdir -p "$OUT"
+mkdir -p "$OUT"
+OUT="$(readlink -f "$OUT")"
+STAGE="$(mktemp -d -t native-pptx-render.XXXXXXXX)"
+trap 'rm -rf -- "$STAGE"' EXIT
 
 echo "PDF に変換..."
 if command -v soffice >/dev/null 2>&1; then
-  soffice --headless --convert-to pdf --outdir "$OUT" "$PPTX" >/dev/null 2>&1
+  soffice "-env:UserInstallation=file://$STAGE/profile" --headless \
+    --convert-to pdf --outdir "$STAGE" "$PPTX"
 else
   # NixOS: pip も apt も使わない。nix-shell で引く
-  nix-shell -p libreoffice-fresh --run \
-    "soffice --headless --convert-to pdf --outdir '$OUT' '$PPTX'" >/dev/null 2>&1
+  env NYX_RENDER_PPTX="$PPTX" NYX_RENDER_STAGE="$STAGE" \
+    nix-shell -p libreoffice-fresh --run \
+    'soffice "-env:UserInstallation=file://$NYX_RENDER_STAGE/profile" --headless --convert-to pdf --outdir "$NYX_RENDER_STAGE" "$NYX_RENDER_PPTX"'
 fi
 
-PDF="$OUT/$(basename "${PPTX%.pptx}").pdf"
+PDF="$STAGE/$(basename "${PPTX%.pptx}").pdf"
 [ -f "$PDF" ] || { echo "PDF 変換に失敗した: $PDF" >&2; exit 1; }
 
 echo "PNG に展開..."
-magick -density "$DENSITY" "$PDF" -quality 90 "$OUT/p-%02d.png" >/dev/null 2>&1
-
-N=$(find "$OUT" -name 'p-*.png' | wc -l)
-echo "コンタクトシートを作成... ($N 枚)"
-# shellcheck disable=SC2046
-magick montage $(find "$OUT" -name 'p-*.png' | sort) \
-  -tile "$TILE" -geometry 460x259+5+5 -background '#dddddd' \
-  "$OUT/contact.png" >/dev/null 2>&1
+uv run "$SKILL_ROOT/scripts/render_pdf.py" "$PDF" "$OUT" --dpi "$DENSITY" --cols "$COLS"
+cp -- "$PDF" "$OUT/$(basename "$PDF")"
 
 echo
 echo "  $OUT/contact.png     ← まずこれを見る（溢れ・衝突・空白の偏りは縮小画像で見つかる）"

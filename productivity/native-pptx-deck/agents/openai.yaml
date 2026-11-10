@@ -1,0 +1,4 @@
+interface:
+  display_name: "PowerPoint Decks"
+  short_description: "実物の証拠と明快なコピーで編集可能なPPTXを作成・改善する"
+  default_prompt: "Use $native-pptx-deck to improve this PowerPoint with concrete evidence, concise copy, and rendered visual checks."
